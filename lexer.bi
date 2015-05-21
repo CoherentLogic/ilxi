@@ -21,7 +21,7 @@ type lexer_entry
 
      intval as integer
      floatval as double
-     byteval as byte
+     byteval as ubyte
      strval as string
 end type
 

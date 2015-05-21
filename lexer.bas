@@ -14,8 +14,6 @@ function lex(input_str as string) as integer
     dim tmp_int as integer
     dim tmp_float as double
 
-    dim in_quoted_string as integer = 0
-
     dim recog_state as byte = LC_UNKNOWN
     lex_reset_storage
 

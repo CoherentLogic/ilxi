@@ -49,14 +49,14 @@ sub init_cpu()
 end sub
 
 sub cpu()
-    dim opcode as byte
-    dim srcmod as byte
-    dim srcbytes as byte
+    dim opcode as ubyte
+    dim srcmod as ubyte
+    dim srcbytes as ubyte
     dim src as integer
-    dim dstmod as byte
-    dim dstbytes as byte
+    dim dstmod as ubyte
+    dim dstbytes as ubyte
     dim dst as integer
-    dim inst_size as byte
+    dim inst_size as ubyte
 
     cpu_state.hf = 0
 
@@ -66,9 +66,77 @@ sub cpu()
 
 
 	  select case opcode
-	  	 case 0 'NOP
+	  	 case OP_LOAD
+		 
+		 case OP_STORE
+		 
+		 case OP_ADD
+		 
+		 case OP_SUB
+		 
+		 case OP_MUL
+		 
+		 case OP_DIV
+		 
+		 case OP_SHL
+
+		 case OP_SHR
+
+		 case OP_OR
+		 
+		 case OP_NOT
+
+		 case OP_AND
+
+		 case OP_XOR
+
+		 case OP_EQV
+
+		 case OP_EQ
+
+		 case OP_NE
+
+		 case OP_GT
+		 
+		 case OP_LT
+
+		 case OP_GE
+
+		 case OP_LE
+
+		 case OP_BRANCH
+
+		 case OP_BEQ
+
+		 case OP_BNE
+		 
+		 case OP_BLE
+
+		 case OP_BGE
+
+		 case OP_BLT
+
+		 case OP_BGT
+		 
+		 case OP_SCALL
+
+		 case OP_LCALL
+
+		 case OP_ICALL
+
+		 case OP_SRET
+		 
+		 case OP_LRET
+
+		 case OP_IRET
+
+		 case OP_PUSH
+
+		 case OP_POP
+
+	  	 case OP_NOP
 		      
-	  	 case 1 'HLT
+	  	 case OP_HLT
 		      cpu_state.hf = 1
 		 case else
 
@@ -100,11 +168,11 @@ sub cpu()
     
 end sub
 
-function cpu_fetch() as byte
+function cpu_fetch() as ubyte
 	 return st_read_byte(cpu_state.cp, cpu_state.pc)
 end function
 
-function cpu_decode(opcode as byte) as byte
+function cpu_decode(opcode as ubyte) as ubyte
 	 return 1
 end function
 
@@ -127,7 +195,7 @@ sub cpu_dump_state()
     print ""
 end sub
 
-sub cpu_set_reg_alpha(register as string, value as byte)
+sub cpu_set_reg_alpha(register as string, value as integer)
     
     select case register
 	    case REG_PC 	 
@@ -189,7 +257,7 @@ sub cpu_set_reg_alpha(register as string, value as byte)
     end select
 end sub
 
-function cpu_get_reg_alpha(register as string) as byte
+function cpu_get_reg_alpha(register as string) as integer
 
     select case register
 	    case REG_PC 	 
