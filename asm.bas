@@ -7,8 +7,10 @@
 #include "asm.bi"
 #include "cpu.bi"
 #include "lexer.bi"
+#include "storage.bi"
+#include "ilxi.bi"
 
-dim shared asm_offset as ushort = 0
+dim shared asm_offset as ushort
 
 function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
     '  7 6543 210
@@ -308,9 +310,82 @@ function asm_encode_opcode(instruction as string) as ubyte
 end function
 
 sub asm_assemble(instruction as string)
+
+    dim op_size as ubyte = 1 ' instructions are always at least one byte long (for the opcode)
+    dim arg_count as integer = 0
+    dim operand_count as integer = 0
+    dim opcode as ubyte = 0
+    dim operand as t_operand
+    dim ops_following as ubyte = 0
+
+    dim i as integer
+
+    dim inst as string
+
+    arg_count = lex(instruction)
     
+    inst = get_lexer_entry(0).strval
+    opcode = asm_encode_opcode(inst)   
+
+    st_write_byte cpu_state.dp, asm_offset, opcode
+    asm_offset = asm_offset + 1
+
+    select case opcode
+        case OP_COPY, OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_SHL, OP_SHR, OP_OR, OP_NOT, OP_AND, OP_XOR, OP_EQV
+            operand_count = 2
+        case OP_EQ, OP_NE, OP_GT, OP_LT, OP_GE, OP_LE
+            operand_count = 2
+        case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH
+            operand_count = 1
+        case OP_LCALL
+            operand_count = 2
+        case OP_BEQ, OP_BNE, OP_BLE, OP_BGE, OP_BLT, OP_BGT
+            operand_count = 3
+        case OP_SRET, OP_LRET, OP_IRET, OP_POP, OP_NOP, OP_HLT
+            operand_count = 0
+    end select
+
+    for i = 1 to operand_count
+
+        if i < operand_count then
+            ops_following = 1
+        else
+            ops_following = 0
+        end if
+
+        operand = asm_encode_address(ops_following, get_lexer_entry(i).strval)
+            
+        st_write_byte cpu_state.dp, asm_offset, operand.amod
+        
+        asm_offset = asm_offset + 1
+
+        st_write_byte cpu_state.dp, asm_offset, operand.low_byte
+
+        if operand.byte_count = 2 then
+            asm_offset = asm_offset + 1
+            st_write_byte cpu_state.dp, asm_offset, operand.high_byte
+        end if
+                
+    next i
+
 end sub
 
 sub asm_assemble_interactive(origin_address as ushort)
+
+    dim asm_prompt as string
+    dim asm_inst as string
+
+    asm_offset = origin_address
+
+    do
+        asm_prompt = ilxi_pad_left(hex(cpu_state.dp), "0", 4) & ":" & ilxi_pad_left(hex(asm_offset), "0", 4) & "  "
+        line input asm_prompt, asm_inst
+
+        if len(asm_inst) > 0 then
+            asm_assemble asm_inst
+    
+            asm_offset = asm_offset + 1
+        end if
+    loop until asm_inst = ""
     
 end sub
