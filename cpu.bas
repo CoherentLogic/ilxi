@@ -9,43 +9,44 @@
 '
 #include "cpu.bi"
 #include "storage.bi"
+#include "asm.bi"
 
 sub init_cpu()
-    
-    with cpu_state
-       	 .pc = 0 
-	 
-	 .ec = 0
-	 .es = 0
-	 .hf = 0
-	 .rf = 0
-	 .ei = 1
-	 .te = 0
-	 .pl = 0
-	 
-	 .cp = 0
-	 .dp = 0
-	 .sp = 0
-	 .so = 0
-
-	 .ga = 0
-	 .gb = 0
-	 .gc = 0
-	 .gd = 0
-	 .ge = 0
-	 .gf = 0
-	 .gg = 0
-	 .gh = 0
-	 .gi = 0
-	 .gj = 0
-	 .gk = 0
-	 .gl = 0
-	 .gm = 0
-	 .gn = 0
-	 .go = 0
-	 .gp = 0
-    end with   
-
+            
+	with cpu_state
+		.pc = 0 
+		
+		.ec = 0
+		.es = 0
+		.hf = 0
+		.rf = 0
+		.ei = 1
+		.te = 0
+		.pl = 0
+		
+		.cp = 0
+		.dp = 0
+		.sp = 0
+		.so = 0
+		
+		.ga = 0
+		.gb = 0
+		.gc = 0
+		.gd = 0
+		.ge = 0
+		.gf = 0
+		.gg = 0
+		.gh = 0
+		.gi = 0
+		.gj = 0
+		.gk = 0
+		.gl = 0
+		.gm = 0
+		.gn = 0
+		.go = 0
+		.gp = 0
+	end with   
+	
 end sub
 
 sub cpu()
@@ -58,17 +59,23 @@ sub cpu()
     dim dst as integer
     dim inst_size as ubyte
 
+    dim tmp as t_operand
+    tmp = asm_encode_address(1, "%ga")
+    tmp = asm_encode_address(1, "#05")
+    tmp = asm_encode_address(1, "#1024")
+    tmp = asm_encode_address(1, "(%ga)+4")
+    tmp = asm_encode_address(1, "(#05)+4")
+    tmp = asm_encode_address(1, "(#1024)+4")
+
     cpu_state.hf = 0
 
     do	  
-    	  opcode = cpu_fetch()
+   	  opcode = cpu_fetch()
 	  inst_size = cpu_decode(opcode)
-
+                        
 
 	  select case opcode
-	  	 case OP_LOAD
-		 
-		 case OP_STORE
+	  	 case OP_COPY		 		 
 		 
 		 case OP_ADD
 		 
@@ -142,7 +149,7 @@ sub cpu()
 
           end select
 	  
-	  if cpu_state.pc >= PAGESIZE then
+	  if cpu_state.pc >= (PAGESIZE - 1) then
 	     cpu_state.hf = 1
 	     cpu_state.ec = 0
 	     cpu_state.es = 0
@@ -195,7 +202,7 @@ sub cpu_dump_state()
     print ""
 end sub
 
-sub cpu_set_reg_alpha(register as string, value as integer)
+sub cpu_set_reg_alpha(register as string, value as ushort)
     
     select case register
 	    case REG_PC 	 
@@ -257,7 +264,7 @@ sub cpu_set_reg_alpha(register as string, value as integer)
     end select
 end sub
 
-function cpu_get_reg_alpha(register as string) as integer
+function cpu_get_reg_alpha(register as string) as ushort
 
     select case register
 	    case REG_PC 	 

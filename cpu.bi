@@ -12,24 +12,26 @@
 '     |BYTE 1  | BYTE 2   |BYTE 3  |
 '     +--------+----------+--------+
 '
-' OPCODE (instruction opcode) 0-255
-' O      (operands following)   0 = no operands following; 1 = 1 operand following
-' MOD    (addressing mode)  
-'        0000 = immediate
-'	 0001 = register direct
-'	 0010 = memory direct
-'	 0011 = register indirect
-'        0100 = memory indirect
-'        0101 = register indirect + displacement
-'        0110 = memory indirect + displacement
-' DISP   000 = 2 bytes displacement
-'        001 = 4 bytes displacement
-'        010 = 8 bytes displacement
-'        011 = 16 bytes displacement
-'	 100 = 32 bytes displacement
-'	 101 = 64 bytes displacement
-'	 110 = 128 bytes displacement
-'	 111 = 256 bytes displacement
+' OPCODE    (instruction opcode) 0-255
+' O         (operands following)   0 = no operands following; 1 = 1 operand following
+' MOD       (addressing mode)  
+'           0   0000 = immediate
+'           1   0001 = register direct
+'           2   0010 = memory direct
+'           3   0011 = register direct + displacement
+'           4   0100 = memory direct + displacement
+'           5   0101 = register indirect
+'           6   0110 = memory indirect
+'           7   0111 = register indirect + displacement
+'           8   1000 = memory indirect + displacement
+' DISP      0   000 = 2 bytes displacement
+'           1   001 = 4 bytes displacement
+'           2   010 = 8 bytes displacement
+'           3   011 = 16 bytes displacement
+'           4   100 = 32 bytes displacement
+'           5   101 = 64 bytes displacement
+'           6   110 = 128 bytes displacement
+'           7   111 = 256 bytes displacement
 '
 ' BYTE 1 is the OPCODE byte
 ' BYTE 2 is the AMOD byte for the first operand, describing
@@ -98,10 +100,12 @@
 #define AM_IMM    0
 #define AM_REGD   1
 #define AM_MEMD   2
-#define AM_REGI   3
-#define AM_MEMI   4
-#define AM_REGID  5
-#define AM_MEMID  6
+#define AM_REGDD  3
+#define AM_MEMDD  4
+#define AM_REGI   5
+#define AM_MEMI   6
+#define AM_REGID  7
+#define AM_MEMID  8
 
 '
 ' addressing displacements; 4 most significant bits
@@ -196,7 +200,8 @@
 #define NREG_GO 54
 #define NREG_GP 55
 
-type t_cpu_state
+type t_cpu_state            
+                 
      pc as ushort	'program counter
 
      ec	as ushort	'error code
@@ -226,7 +231,7 @@ type t_cpu_state
      gl as ushort	'general l
      gm as ushort	'general m
      gn as ushort	'general n
-     go as ushort       'general o
+     go as ushort   'general o
      gp as ushort	'general p
 end type
 
