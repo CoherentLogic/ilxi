@@ -12,7 +12,7 @@ sub machine_error(error_code as integer, severity as integer)
     cpu_state.es = severity
 
     if severity >= 10 then
-       cpu_state.hf = 1
+       cpu_set_flag FL_HALT
     end if
 
 end sub

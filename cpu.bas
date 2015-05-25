@@ -2,14 +2,10 @@
 ' cpu.bas
 '
 
-'
-' instruction format
-' 
-' OPCODE SRCMOD SRCBYTES SRC DSTMOD DSTBYTES DST
-'
 #include "cpu.bi"
 #include "storage.bi"
 #include "asm.bi"
+#include "ilxi.bi"
 
 sub init_cpu()
             
@@ -18,14 +14,11 @@ sub init_cpu()
 		
 		.ec = 0
 		.es = 0
-		.hf = 0
-		.rf = 0
-		.ei = 1
-		.te = 0
-		.pl = 0
-		
+		.fl = 0
+
 		.cp = 0
 		.dp = 0
+        .ep = 0
 		.sp = 0
 		.so = 0
 		
@@ -67,7 +60,7 @@ sub cpu()
     tmp = asm_encode_address(1, "(#05)+4")
     tmp = asm_encode_address(1, "(#1024)+4")
 
-    cpu_state.hf = 0
+    cpu_clear_flag FL_HALT
 
     do	  
    	  opcode = cpu_fetch()
@@ -99,27 +92,13 @@ sub cpu()
 
 		 case OP_EQV
 
-		 case OP_EQ
-
-		 case OP_NE
-
-		 case OP_GT
-		 
-		 case OP_LT
-
-		 case OP_GE
-
-		 case OP_LE
+		 case OP_CMP
 
 		 case OP_BRANCH
 
 		 case OP_BEQ
 
-		 case OP_BNE
-		 
-		 case OP_BLE
-
-		 case OP_BGE
+         case OP_BNE
 
 		 case OP_BLT
 
@@ -144,18 +123,18 @@ sub cpu()
 	  	 case OP_NOP
 		      
 	  	 case OP_HLT
-		      cpu_state.hf = 1
+		      cpu_set_flag FL_HALT
 		 case else
 
           end select
 	  
 	  if cpu_state.pc >= (PAGESIZE - 1) then
-	     cpu_state.hf = 1
+	     cpu_set_flag FL_HALT
 	     cpu_state.ec = 0
 	     cpu_state.es = 0
 	  end if
 
-	  if cpu_state.hf > 0 then
+	  if cpu_get_flag(FL_HALT) then
 	     if cpu_state.es > 0 then
 	     	print "cpu(): trap "; trim(str(cpu_state.ec)); " at pc = "; trim(str(cpu_state.pc))
 	     else
@@ -169,7 +148,16 @@ sub cpu()
 	     cpu_state.pc = cpu_state.pc + inst_size
 	  end if
 
-	  if cpu_state.te > 0 then cpu_dump_state
+	  if cpu_get_flag(FL_TRACE) then cpu_dump_state
+      if cpu_get_flag(FL_DEBUG) then
+        print ""
+        print ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":";
+        print ilxi_pad_left(hex(cpu_state.pc), "0", 4); " ";
+
+        print asm_disassemble(cpu_state.cp, cpu_state.pc)
+
+        exit do
+      end if        
     loop
 
     
@@ -191,15 +179,47 @@ sub cpu_dump_state()
     print ""
     print "Page Size:", PAGESIZE,"Page Count:",PAGECOUNT
     print ""
-    print "PC "; x.pc, "EC "; x.ec, "ES "; x.es, "HF "; x.hf, "RF "; x.rf
-    print "CP "; x.cp, "DP "; x.dp, "SP "; x.sp, "SO "; x.so, "EI"; x.ei
-    print "TE "; x.te, "PL "; x.pl
+    print "PC "; x.pc, "EC "; x.ec, "ES "; x.es, "CP "; x.cp, "DP "; x.dp
+    print "EP "; x.ep, "SP "; x.sp, "SO "; x.so, "FL "; x.fl
     print ""
     print "GA "; x.ga, "GB "; x.gb, "GC "; x.gc, "GD "; x.gd, "GE "; x.ge 
     print "GF "; x.gf, "GG "; x.gg, "GH "; x.gh, "GI "; x.gi, "GJ "; x.gj 
     print "GK "; x.gk, "GL "; x.gl, "GM "; x.gm, "GN "; x.gn, "GO "; x.go
     print "GP "; x.gp
     print ""
+    print "Flags:"
+    print ""
+    print "HF="; cpu_get_flag(FL_HALT); " TF="; cpu_get_flag(FL_TRACE); " OF="; cpu_get_flag(FL_OVERFLOW);
+    print " CF="; cpu_get_flag(FL_CARRY); " IF="; cpu_get_flag(FL_INTERRUPT); " EF="; cpu_get_flag(FL_EQUALITY);
+    print " LF="; cpu_get_flag(FL_LESSTHAN); " GF="; cpu_get_flag(FL_GREATERTHAN); " ZF="; cpu_get_flag(FL_ZERO);
+    print " PL=0 PF="; cpu_get_flag(FL_PARITY); " SF="; cpu_get_flag(FL_SIGN); " DF="; cpu_get_flag(FL_DEBUG);
+    print ""
+end sub
+
+sub cpu_set_flag(flag as ushort)
+    cpu_state.fl = cpu_state.fl or flag
+end sub
+
+sub cpu_clear_flag(flag as ushort)
+    if cpu_get_flag(flag) = 1 then
+        cpu_state.fl = (not cpu_state.fl) and flag
+    end if
+end sub
+
+function cpu_get_flag(flag as ushort) as ubyte
+    if (cpu_state.fl and flag) = flag then
+        return 1
+    else
+        return 0
+    end if
+end function
+
+function cpu_get_pl() as ubyte
+    return (cpu_state.fl and PL_MASK) shr 9
+end function
+
+sub cpu_set_pl(privilege_level as ubyte)
+    cpu_state.fl or= (privilege_level shl 9)
 end sub
 
 sub cpu_set_reg_alpha(register as string, value as ushort)
@@ -210,21 +230,15 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
 	    case REG_EC
 	    	 cpu_state.ec = value
 	    case REG_ES
-     	    	 cpu_state.es = value
-	    case REG_HF
-	    	 cpu_state.hf = value
-	    case REG_RF
-	    	 cpu_state.rf = value
-	    case REG_EI
-	    	 cpu_state.ei = value
-	    case REG_TE
-	    	 cpu_state.te = value
-	    case REG_PL
-	    	 cpu_state.pl = value
+   	    	 cpu_state.es = value
+        case REG_FL
+             cpu_state.fl = value
 	    case REG_CP
 	    	 cpu_state.cp = value
 	    case REG_DP
 	    	 cpu_state.dp = value
+        case REG_EP
+            cpu_state.ep = value
 	    case REG_SP
 	    	 cpu_state.sp = value
 	    case REG_SO
@@ -272,21 +286,15 @@ function cpu_get_reg_alpha(register as string) as ushort
 	    case REG_EC
 	    	 return cpu_state.ec
 	    case REG_ES
-     	    	 return cpu_state.es
-	    case REG_HF
-	    	 return cpu_state.hf
-	    case REG_RF
-	    	 return cpu_state.rf
-	    case REG_EI
-	    	 return cpu_state.ei
-	    case REG_TE
-	    	 return cpu_state.te
-	    case REG_PL
-	    	 return cpu_state.pl
+   	    	 return cpu_state.es
+        case REG_FL
+             return cpu_state.fl
 	    case REG_CP
 	    	 return cpu_state.cp
 	    case REG_DP
 	    	 return cpu_state.dp
+        case REG_EP
+             return cpu_state.ep
 	    case REG_SP
 	    	 return cpu_state.sp
 	    case REG_SO

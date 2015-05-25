@@ -1,5 +1,5 @@
 #define PAGESIZE 65536
-#define PAGECOUNT 512
+#define PAGECOUNT 2048
 
 type st_page
      task_id as ubyte

@@ -11,6 +11,7 @@
 startup
 
 sub startup()
+    color 7,0
     print "ILXIM Virtual Machine"
     print " Copyright (C) 2015 Coherent Logic Development LLC"
     print ""
@@ -48,6 +49,29 @@ sub cli()
                 end if
 
                 asm_assemble_interactive origin_addr
+            case "disassemble"
+                dim page_addr as ushort              
+                dim offset_addr as ushort
+
+                if get_lexer_entry(1).lexer_class = LC_BYTE then
+                    page_addr = get_lexer_entry(1).byteval
+                else
+                    page_addr = get_lexer_entry(1).intval
+                end if
+
+                if get_lexer_entry(2).lexer_class = LC_BYTE then
+                    offset_addr = get_lexer_entry(2).byteval
+                else
+                    offset_addr = get_lexer_entry(2).intval
+                end if
+            
+                print ilxi_pad_left(hex(page_addr), "0", 4); ":";
+                print ilxi_pad_left(hex(offset_addr), "0", 4); "  ";
+
+                print asm_disassemble(page_addr, offset_addr)
+            case "step"
+                cpu_set_flag FL_DEBUG
+                cpu
 	        case "getr"
 	            ilxi_getr get_lexer_entry(1).strval
 	        case "setr"
@@ -98,8 +122,8 @@ sub cli()
 	                print " | ";
 			
 	                for k = i to i + 7
-	                    if st_read_byte(cpu_state.dp, k) = 0 then print ".";
-	                    if st_read_byte(cpu_state.dp, k) > 0 then print chr(st_read_byte(cpu_state.dp, k));
+	                    if st_read_byte(cpu_state.dp, k) <= 31 then color 12,0: print ".";: color 7,0
+	                    if st_read_byte(cpu_state.dp, k) > 31 then color 7,0: print chr(st_read_byte(cpu_state.dp, k));
 	                next k											   
 	            next i
 		    
@@ -128,14 +152,18 @@ sub cli()
 	        case "dumpcpu"
 	       	    cpu_dump_state
 	        case "trace"	       	  		    
-	            cpu_state.te = get_lexer_entry(1).byteval
+	            if get_lexer_entry(1).byteval = 0 then
+                    cpu_clear_flag FL_TRACE
+                else
+                    cpu_set_flag FL_TRACE
+                end if
 	        case "ver"
 	       	    print "ILXI 0.1"
 	        case "run"
+                cpu_clear_flag FL_DEBUG
 	       	    cpu
 	        case "reset"
-	            init_cpu
-	            cpu_state.te = trace
+	            init_cpu	            
 	        case else
 	       	    shell cli_cmd
 	    end select

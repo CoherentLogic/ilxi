@@ -1,7 +1,7 @@
 '
 ' asm.bas
 '
-' assembles instructions into dp:asm_offset
+' assembles instructions into ep:asm_offset
 '
 
 #include "asm.bi"
@@ -24,36 +24,59 @@ function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) a
 
     if ops_following = 1 then
         t or= (1 shl 7)
+    else
+        t or= (0 shl 7)
     end if    
 
     t or= (amod shl 3)   
     t or= (disp)
 
     return t
-end function
+end function ' asm_encode_amod()
 
 function asm_amod_following(amod as ubyte) as ubyte
     return (amod and O_MASK) shr 7
-end function
+end function ' asm_amod_following()
 
 function asm_amod_amod(amod as ubyte) as ubyte
-    return (amod and AMOD_MASK) shr 4
-end function
+    return (amod and AMOD_MASK) shr 3
+end function ' asm_amod_amod()
 
 function asm_amod_disp(amod as ubyte) as ubyte
     return (amod and DISP_MASK)
-end function
+end function ' asm_amod_disp()
+
+function asm_decode_disp(disp as ubyte) as ushort
+    select case disp
+        case 0
+            return 2
+        case 1
+            return 4
+        case 2
+            return 8
+        case 3
+            return 16
+        case 4
+            return 32
+        case 5
+            return 64
+        case 6
+            return 128
+        case 7
+            return 256
+    end select       
+end function ' asm_decode_disp()
 
 function asm_encode_address(ops_following as ubyte, addr_string as string) as t_operand
     '
-    '   xxxx    immediate
-    '   %ga      reg direct
-    '   #xxxx   mem direct
-    '   (%ga)    reg indirect
-    '   (#xxxx) mem indirect
+    '   xxxx    immediate    AM_IMM
+    '   %ga     reg direct   AM_REGD
+    '   #xxxx   mem direct   AM_MEMD
+    '   (%ga)   reg indirect AM_REGI
+    '   (#xxxx) mem indirect AM_MEMI
     '   
     '   Any of the last 4 with +xxxx appended indicates displacement; 
-    '   &H02-&HFF by powers of 2
+    '   &H02-&HFF by powers of 2 (AM_REGDD, AM_MEMDD, AM_REGID, AM_MEMID)
     '
 
     dim byte_count as ubyte = 0
@@ -91,6 +114,7 @@ function asm_encode_address(ops_following as ubyte, addr_string as string) as t_
             end select
         case else
             is_immediate = 1
+            addr_part = addr_string
     end select
 
     if instr(addr_string, "+") > 0 then 
@@ -155,11 +179,14 @@ function asm_encode_address(ops_following as ubyte, addr_string as string) as t_
         tmp.low_byte = addr_val and &HFF
         tmp.high_byte = (addr_val and &HFF00) shr 8
 
-        if addr_val > 255 then
-            tmp.byte_count = 2
-        else
-            tmp.byte_count = 1
-        end if
+        tmp.byte_count = 2 ' always assume byte count = 2 for memory
+    elseif is_immediate = 1 then
+        addr_val = valint(addr_part)
+
+        tmp.low_byte = addr_val and &HFF
+        tmp.high_byte = (addr_val and &HF00) shr 8
+
+        tmp.byte_count = 2  ' always assume byte count = 2 for immediate data   
     elseif is_register = 1 then
         addr_val = asm_encode_register(addr_part)
         
@@ -171,7 +198,7 @@ function asm_encode_address(ops_following as ubyte, addr_string as string) as t_
     tmp.amod = amod
 
     return tmp
-end function
+end function ' asm_encode_address()
 
 function asm_encode_register(register_name as string) as ubyte
     select case lcase(register_name)
@@ -181,20 +208,14 @@ function asm_encode_register(register_name as string) as ubyte
             return NREG_EC
         case "es"
             return NREG_ES
-        case "hf"
-            return NREG_HF
-        case "rf"
-            return NREG_RF
-        case "ei"
-            return NREG_EI
-        case "te"
-            return NREG_TE
-        case "pl"
-            return NREG_PL
+        case "fl"
+            return NREG_FL
         case "cp"
             return NREG_CP
         case "dp"
             return NREG_DP
+        case "ep"
+            return NREG_EP
         case "sp"
             return NREG_SP
         case "so"
@@ -232,7 +253,62 @@ function asm_encode_register(register_name as string) as ubyte
         case "gp"
             return NREG_GP
     end select       
-end function
+end function ' asm_encode_register()
+
+function asm_decode_register(reg as ubyte) as string
+    select case reg
+        case NREG_PC
+            return "pc"
+        case NREG_EC
+            return "ec"
+        case NREG_ES
+            return "es"
+        case NREG_FL
+            return "fl"
+        case NREG_CP
+            return "cp"
+        case NREG_DP
+            return "dp"
+        case NREG_EP
+            return "ep"
+        case NREG_SP
+            return "sp"
+        case NREG_SO
+            return "so"
+        case NREG_GA
+            return "ga"
+        case NREG_GB
+            return "gb"
+        case NREG_GC
+            return "gc"
+        case NREG_GD
+            return "gd"
+        case NREG_GE
+            return "ge"
+        case NREG_GF
+            return "gf"
+        case NREG_GG
+            return "gg"
+        case NREG_GH
+            return "gh"
+        case NREG_GI
+            return "gi"
+        case NREG_GJ
+            return "gj"
+        case NREG_GK
+            return "gk"
+        case NREG_GL
+            return "gl"
+        case NREG_GM
+            return "gm"
+        case NREG_GN
+            return "gn"
+        case NREG_GO
+            return "go"
+        case NREG_GP
+            return "gp"
+    end select
+end function ' asm_decode_register()
 
 function asm_encode_opcode(instruction as string) as ubyte
     select case lcase(instruction)
@@ -260,32 +336,20 @@ function asm_encode_opcode(instruction as string) as ubyte
             return OP_XOR
         case "eqv"
             return OP_EQV
-        case "eq"
-            return OP_EQ
-        case "ne"
-            return OP_NE
-        case "gt"
-            return OP_GT
-        case "lt"
-            return OP_LT
-        case "ge"
-            return OP_GE
-        case "le"
-            return OP_LE
+        case "cmp"
+            return OP_CMP
         case "branch"
             return OP_BRANCH
         case "beq"
             return OP_BEQ
         case "bne"
             return OP_BNE
-        case "ble"
-            return OP_BLE
-        case "bge"
-            return OP_BGE
         case "blt"
-            return OP_BLT
+            return OP_BLT        
         case "bgt"
             return OP_BGT
+        case "bz"
+            return OP_BZ
         case "scall"
             return OP_SCALL
         case "lcall"
@@ -307,7 +371,70 @@ function asm_encode_opcode(instruction as string) as ubyte
         case "hlt"
             return OP_HLT
     end select
-end function
+end function ' asm_encode_opcode()
+
+function asm_decode_opcode(opcode as ubyte) as string
+    select case opcode
+        case OP_COPY
+            return "copy"
+        case OP_ADD
+            return "add"
+        case OP_SUB
+            return "sub"
+        case OP_MUL
+            return "mul"
+        case OP_DIV
+            return "div"
+        case OP_SHL
+            return "shl"
+        case OP_SHR
+            return "shr"
+        case OP_OR
+            return "or"
+        case OP_NOT
+            return "not"
+        case OP_AND
+            return "and"
+        case OP_XOR
+            return "xor"
+        case OP_EQV
+            return "eqv"
+        case OP_CMP
+            return "cmp"
+        case OP_BRANCH
+            return "branch"
+        case OP_BEQ
+            return "beq"
+        case OP_BNE
+            return "bne"
+        case OP_BZ
+            return "bz"
+        case OP_BLT
+            return "blt"
+        case OP_BGT
+            return "bgt"
+        case OP_SCALL
+            return "scall"
+        case OP_LCALL
+            return "lcall"
+        case OP_ICALL
+            return "icall"
+        case OP_SRET
+            return "sret"
+        case OP_LRET
+            return "lret"
+        case OP_IRET
+            return "iret"
+        case OP_PUSH
+            return "push"
+        case OP_POP
+            return "pop"
+        case OP_NOP
+            return "nop"
+        case OP_HLT
+            return "hlt"
+    end select      
+end function ' asm_decode_opcode()
 
 sub asm_assemble(instruction as string)
 
@@ -327,26 +454,15 @@ sub asm_assemble(instruction as string)
     inst = get_lexer_entry(0).strval
     opcode = asm_encode_opcode(inst)   
 
-    st_write_byte cpu_state.dp, asm_offset, opcode
-    asm_offset = asm_offset + 1
+    st_write_byte cpu_state.ep, asm_offset, opcode
 
-    select case opcode
-        case OP_COPY, OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_SHL, OP_SHR, OP_OR, OP_NOT, OP_AND, OP_XOR, OP_EQV
-            operand_count = 2
-        case OP_EQ, OP_NE, OP_GT, OP_LT, OP_GE, OP_LE
-            operand_count = 2
-        case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH
-            operand_count = 1
-        case OP_LCALL
-            operand_count = 2
-        case OP_BEQ, OP_BNE, OP_BLE, OP_BGE, OP_BLT, OP_BGT
-            operand_count = 3
-        case OP_SRET, OP_LRET, OP_IRET, OP_POP, OP_NOP, OP_HLT
-            operand_count = 0
-    end select
+
+    operand_count = asm_operand_count(opcode)
 
     for i = 1 to operand_count
-
+        
+        asm_offset = asm_offset + 1
+        
         if i < operand_count then
             ops_following = 1
         else
@@ -355,20 +471,155 @@ sub asm_assemble(instruction as string)
 
         operand = asm_encode_address(ops_following, get_lexer_entry(i).strval)
             
-        st_write_byte cpu_state.dp, asm_offset, operand.amod
+'        print "operand_count: "; operand_count; " operand: "; i; " amod: "; hex(operand.amod);
+'        print " low_byte: "; hex(operand.low_byte); " high_byte: "; hex(operand.high_byte)
+
+        st_write_byte cpu_state.ep, asm_offset, operand.amod
         
         asm_offset = asm_offset + 1
 
-        st_write_byte cpu_state.dp, asm_offset, operand.low_byte
+        st_write_byte cpu_state.ep, asm_offset, operand.low_byte
 
         if operand.byte_count = 2 then
             asm_offset = asm_offset + 1
-            st_write_byte cpu_state.dp, asm_offset, operand.high_byte
+            st_write_byte cpu_state.ep, asm_offset, operand.high_byte
         end if
                 
     next i
 
-end sub
+end sub ' asm_assemble()
+
+function asm_operand_count(opcode as ubyte) as ubyte
+    select case opcode
+        case OP_COPY, OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_SHL, OP_SHR, OP_OR, OP_NOT, OP_AND, OP_XOR, OP_EQV
+            return 2
+        case OP_CMP
+            return 2
+        case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH
+            return 1
+        case OP_LCALL
+            return 2
+        case OP_BEQ, OP_BNE, OP_BZ, OP_BLT, OP_BGT
+            return 1
+        case OP_SRET, OP_LRET, OP_IRET, OP_POP, OP_NOP, OP_HLT
+            return 0
+    end select
+end function ' asm_operand_count()
+
+function asm_disassemble(page as ushort, offset as ushort) as string
+    
+    dim opcode as ubyte
+    dim operands() as t_operand
+    dim operand_count as ubyte
+    dim i as ushort
+
+    dim displacement as ushort
+    dim ops_following as ubyte
+    dim actual_amod as ubyte
+    dim addr as ushort
+    dim lsb as ubyte
+    dim msb as ubyte
+    dim tmp_str as string
+    dim reg as ubyte
+
+    opcode = st_read_byte(page, offset)
+    operand_count = asm_operand_count(opcode)
+
+    tmp_str &= asm_decode_opcode(opcode) & " "
+
+    redim operands(operand_count) as t_operand
+
+
+
+    for i = 1 to operand_count
+
+        offset = offset + 1        
+
+        ' get amod byte and increment the offset
+        operands(i).amod = st_read_byte(page, offset)
+        offset = offset + 1
+
+        actual_amod = asm_amod_amod(operands(i).amod)
+
+'print "for operand "; i; ", got amod byte of "; actual_amod; " (binary "; bin(actual_amod); ")"
+
+        displacement = asm_decode_disp(asm_amod_disp(operands(i).amod))
+
+        select case actual_amod
+            case AM_IMM   'immediate
+            
+                lsb = st_read_byte(page, offset)
+                offset = offset + 1
+                msb = st_read_byte(page, offset)
+                addr = asm_bytes_to_ushort(lsb, msb)
+
+                tmp_str &= trim(str(addr))                                                        
+            
+            case AM_REGD  'register direct
+            
+                reg = st_read_byte(page, offset)
+                tmp_str &= "%" & asm_decode_register(reg)                
+            
+            case AM_MEMD  'memory direct
+
+                lsb = st_read_byte(page, offset)
+                offset = offset + 1
+                msb = st_read_byte(page, offset)
+                addr = asm_bytes_to_ushort(lsb, msb)
+
+                tmp_str &= "#" & trim(str(addr))                                                                
+
+            case AM_REGDD 'reg. direct + disp
+
+                reg = st_read_byte(page, offset)
+                tmp_str &= "%" & asm_decode_register(reg) & "+" & trim(str(displacement))
+
+            case AM_MEMDD 'mem. direct + disp
+
+                lsb = st_read_byte(page, offset)
+                offset = offset + 1
+                msb = st_read_byte(page, offset)
+                addr = asm_bytes_to_ushort(lsb, msb)
+
+                tmp_str &= "#" & trim(str(addr)) & "+" & trim(str(displacement))                                        
+            case AM_REGI  'register indirect
+            
+                reg = st_read_byte(page, offset)
+                tmp_str &= "(%" & asm_decode_register(reg) & ")"
+    
+            case AM_MEMI  'memory indirect
+
+                lsb = st_read_byte(page, offset)
+                offset = offset + 1
+                msb = st_read_byte(page, offset)
+                addr = asm_bytes_to_ushort(lsb, msb)
+
+                tmp_str &= "(#" & trim(str(addr)) & ")"
+            case AM_REGID 'reg. indirect + disp
+    
+                reg = st_read_byte(page, offset)
+                tmp_str &= "(%" & asm_decode_register(reg) & ")+" & trim(str(displacement))
+            
+            case AM_MEMID 'mem. indirect + disp
+                lsb = st_read_byte(page, offset)
+                offset = offset + 1
+                msb = st_read_byte(page, offset)
+                addr = asm_bytes_to_ushort(lsb, msb)
+
+                tmp_str &= "(#" & trim(str(addr)) & ")+" & trim(str(displacement))
+
+        end select        
+
+        if i < operand_count then tmp_str &= ","
+
+    next i
+
+    return tmp_str
+end function ' asm_disassemble()
+
+function asm_bytes_to_ushort(lsb as ubyte, msb as ubyte) as ushort
+    return (msb shl 8) or lsb
+end function ' asm_bytes_to_ushort() 
 
 sub asm_assemble_interactive(origin_address as ushort)
 
@@ -378,14 +629,17 @@ sub asm_assemble_interactive(origin_address as ushort)
     asm_offset = origin_address
 
     do
-        asm_prompt = ilxi_pad_left(hex(cpu_state.dp), "0", 4) & ":" & ilxi_pad_left(hex(asm_offset), "0", 4) & "  "
+
+        asm_prompt = ilxi_pad_left(hex(cpu_state.ep), "0", 4) & ":" & ilxi_pad_left(hex(asm_offset), "0", 4) & "  "
         line input asm_prompt, asm_inst
 
         if len(asm_inst) > 0 then
-            asm_assemble asm_inst
-    
+            asm_assemble asm_inst  
             asm_offset = asm_offset + 1
+        else
+            exit do
         end if
+
     loop until asm_inst = ""
     
-end sub
+end sub ' asm_assemble_interactive()

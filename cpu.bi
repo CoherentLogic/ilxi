@@ -66,18 +66,12 @@
 #define OP_AND    011
 #define OP_XOR    012
 #define OP_EQV    013
-#define OP_EQ     014
-#define OP_NE     015
-#define OP_GT     016
-#define OP_LT     017
-#define OP_GE     018
-#define OP_LE     019
+#define OP_CMP    014
 
 #define OP_BRANCH 020
 #define OP_BEQ	  021
 #define OP_BNE	  022
-#define OP_BLE	  023
-#define OP_BGE	  024
+#define OP_BZ     023
 #define OP_BLT	  025
 #define OP_BGT	  026
 
@@ -136,14 +130,11 @@
 
 #define REG_EC "ec"
 #define REG_ES "es"
-#define REG_HF "hf"
-#define REG_RF "rf"
-#define REG_EI "ei"
-#define REG_TE "te"
-#define REG_PL "pl"
+#define REG_FL "fl"
 
 #define REG_CP "cp"
 #define REG_DP "dp"
+#define REG_EP "ep"
 #define REG_SP "sp"
 #define REG_SO "so"
 
@@ -172,16 +163,13 @@
 
 #define NREG_EC 1
 #define NREG_ES 2
-#define NREG_HF 3
-#define NREG_RF 4
-#define NREG_EI 5
-#define NREG_TE 6
-#define NREG_PL 7
+#define NREG_FL 3
 
 #define NREG_CP 20
 #define NREG_DP 21
-#define NREG_SP 22
-#define NREG_SO 23
+#define NREG_EP 22
+#define NREG_SP 23
+#define NREG_SO 24
 
 #define NREG_GA 40
 #define NREG_GB 41
@@ -200,21 +188,49 @@
 #define NREG_GO 54
 #define NREG_GP 55
 
+'
+' flags
+'
+#define FL_HALT 1
+#define FL_TRACE 2
+#define FL_OVERFLOW 4
+#define FL_CARRY 8
+#define FL_INTERRUPT 16
+#define FL_EQUALITY 32
+#define FL_LESSTHAN 64
+#define FL_GREATERTHAN 128
+#define FL_ZERO 256
+#define FL_PRIVILEGE_LSB 512
+#define FL_PRIVILEVE_MSB 1024
+#define FL_PARITY 2048
+#define FL_SIGN 4096
+#define FL_DEBUG 8192
+
+'
+' privilege mask
+' 
+#define PL_MASK &H600
+
+'
+' privilege levels
+'
+#define PL_KERNEL 0
+#define PL_DEVICE 1
+#define PL_EXEC 2
+#define PL_USER 3
+
 type t_cpu_state            
                  
      pc as ushort	'program counter
 
      ec	as ushort	'error code
      es as ushort	'error severity
-     hf as ushort	'halt flag
-     rf as ushort	'result flag
-     ei	as ushort	'enable interrupts
-     te as ushort	'trace enable
-     pl as ushort	'privilege level
+     fl as ushort   'flags
 
-     cp as ushort      'code page
-     dp as ushort      'data page
-     sp as ushort      'stack page
+     cp as ushort   'code page
+     dp as ushort   'data page
+     ep as ushort   'extra page
+     sp as ushort   'stack page
      so as ushort 	'stack offset
 
      ga as ushort	'general a
@@ -250,6 +266,11 @@ common shared cpu_state as t_cpu_state
 declare sub init_cpu()
 declare sub cpu()
 declare sub cpu_dump_state()
+declare sub cpu_set_flag(flag as ushort)
+declare sub cpu_clear_flag(flag as ushort)
+declare function cpu_get_pl() as ubyte
+declare sub cpu_set_pl(privilege_level as ubyte)
+declare function cpu_get_flag(flag as ushort) as ubyte
 declare function cpu_fetch() as ubyte
 declare function cpu_decode(opcode as ubyte) as ubyte
 declare sub cpu_set_reg_alpha(register as string, value as ushort)

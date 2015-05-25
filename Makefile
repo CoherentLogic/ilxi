@@ -1,5 +1,5 @@
 OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o
-FBCFLAGS = -g
+FBCFLAGS = -g 
 #-d LEXDEBUG
 
 ilxi: $(OBJS)
