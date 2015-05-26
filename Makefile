@@ -1,4 +1,4 @@
-OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o
+OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o
 FBCFLAGS = -g 
 #-d LEXDEBUG
 
@@ -25,6 +25,9 @@ storage.o: storage.bas
 
 lexer.o: lexer.bas
 	fbc $(FBCFLAGS) -o lexer.o -c lexer.bas
+
+inst.o: inst.bas
+	fbc $(FBCFLAGS) -o inst.o -c inst.bas
 
 ilxi.o: ilxi.bas
 	fbc -m ilxi $(FBCFLAGS) -o ilxi.o -c ilxi.bas

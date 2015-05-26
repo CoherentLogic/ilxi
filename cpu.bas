@@ -6,6 +6,7 @@
 #include "storage.bi"
 #include "asm.bi"
 #include "ilxi.bi"
+#include "inst.bi"
 
 sub init_cpu()
             
@@ -78,122 +79,138 @@ sub cpu()
 
             select case address_mode
                 case AM_IMM
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).high_byte = cpu_fetch()
-                    operands(i).byte_count = 2
-                    operands(i).immediate = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .high_byte = cpu_fetch()
+                        .byte_count = 2
+                        .immediate = 1
+                    end with
                 case AM_REGD
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).byte_count = 1
-                    operands(i).displacement = displacement
-                    operands(i).register = 1
-                    operands(i).has_displacement = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .byte_count = 1
+                        .register = 1
+                    end with
                 case AM_MEMD
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).high_byte = cpu_fetch()
-                    operands(i).byte_count = 2
-                    operands(i).displacement = displacement
-                    operands(i).memory = 1
-                    operands(i).has_displacement = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .high_byte = cpu_fetch()
+                        .byte_count = 2
+                        .memory = 1
+                    end with
                 case AM_REGDD
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).byte_count = 1
-                    operands(i).displacement = displacement
-                    operands(i).register = 1
-                    operands(i).has_displacement = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .byte_count = 1
+                        .displacement = displacement
+                        .register = 1
+                        .has_displacement = 1
+                    end with
                 case AM_MEMDD
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).high_byte = cpu_fetch()
-                    operands(i).byte_count = 2
-                    operands(i).displacement = displacement
-                    operands(i).has_displacement = 1
-                    operands(i).memory = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .high_byte = cpu_fetch()
+                        .byte_count = 2
+                        .displacement = displacement
+                        .has_displacement = 1
+                        .memory = 1
+                    end with
                 case AM_REGI
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).byte_count = 1
-                    operands(i).register = 1
-                    operands(i).indirect = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .byte_count = 1
+                        .register = 1
+                        .indirect = 1
+                    end with
                 case AM_MEMI
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).high_byte = cpu_fetch()
-                    operands(i).byte_count = 2
-                    operands(i).memory = 1
-                    operands(i).indirect = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .high_byte = cpu_fetch()
+                        .byte_count = 2
+                        .memory = 1
+                        .indirect = 1
+                    end with
                 case AM_REGID
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).byte_count = 1
-                    operands(i).displacement = displacement
-                    operands(i).register = 1
-                    operands(i).indirect = 1
-                    operands(i).has_displacement = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .byte_count = 1
+                        .displacement = displacement
+                        .register = 1
+                        .indirect = 1
+                        .has_displacement = 1
+                    end with
                 case AM_MEMID
-                    operands(i).low_byte = cpu_fetch()
-                    operands(i).high_byte = cpu_fetch()
-                    operands(i).byte_count = 2
-                    operands(i).displacement = displacement
-                    operands(i).memory = 1
-                    operands(i).has_displacement = 1
-                    operands(i).indirect = 1
+                    with operands(i)
+                        .low_byte = cpu_fetch()
+                        .high_byte = cpu_fetch()
+                        .byte_count = 2
+                        .displacement = displacement
+                        .memory = 1
+                        .has_displacement = 1
+                        .indirect = 1
+                    end with
             end select                          
         next i
 
         select case opcode
             case OP_COPY		 		 
-		 
+                inst_copy operands(1), operands(2) 
             case OP_ADD
-		 
+                inst_add operands(1), operands(2)
             case OP_SUB
-		 
+                inst_sub operands(1), operands(2)
             case OP_MUL
-		 
+                inst_mul operands(1), operands(2)
             case OP_DIV
-		 
+                inst_div operands(1), operands(2)
             case OP_SHL
-
+                inst_shl operands(1), operands(2)
             case OP_SHR
-
-            case OP_OR
-		 
+                inst_shr operands(1), operands(2)
+            case OP_OR  
+                inst_or operands(1), operands(2)
             case OP_NOT
-
+                inst_not operands(1), operands(2)
             case OP_AND
-
+                inst_and operands(1), operands(2)
             case OP_XOR
-
+                inst_xor operands(1), operands(2)
             case OP_EQV
-
+                inst_eqv operands(1), operands(2)
             case OP_CMP
-
+                inst_cmp operands(1), operands(2)
             case OP_BRANCH
-
+                inst_branch operands(1)
             case OP_BEQ
-
+                inst_beq operands(1)
             case OP_BNE
-
+                inst_bne operands(1)
             case OP_BLT
-
+                inst_blt operands(1)
             case OP_BGT
-		 
+                inst_bgt operands(1)
+            case OP_BZ
+                inst_bz operands(1)
             case OP_SCALL
-
+                inst_scall operands(1)
             case OP_LCALL
-
+                inst_lcall operands(1), operands(2)
             case OP_ICALL
-
+                inst_icall operands(1)
             case OP_SRET
-		 
+                inst_sret
             case OP_LRET
-
+                inst_lret
             case OP_IRET
-
+                inst_iret
             case OP_PUSH
-
+                inst_push operands(1)
             case OP_POP
-
+                inst_pop operands(1)
             case OP_NOP
-		      
+                ' do nothing
             case OP_HLT
-                cpu_set_flag FL_HALT
+                inst_hlt
             case else
 
         end select
@@ -221,7 +238,7 @@ sub cpu()
     loop
 
     
-end sub
+end sub ' cpu()
 
 function cpu_fetch() as ubyte
     dim t_byte as ubyte = 0
@@ -230,7 +247,11 @@ function cpu_fetch() as ubyte
     cpu_state.pc += 1
 
     return t_byte
-end function
+end function ' cpu_fetch()
+
+function cpu_get_effective_address(operand as t_operand) as ushort
+
+end function ' cpu_get_effective_address()
 
 sub cpu_dump_state()
     dim x as t_cpu_state
@@ -255,17 +276,18 @@ sub cpu_dump_state()
     print " LF="; cpu_get_flag(FL_LESSTHAN); " GF="; cpu_get_flag(FL_GREATERTHAN); " ZF="; cpu_get_flag(FL_ZERO);
     print " PL=0 PF="; cpu_get_flag(FL_PARITY); " SF="; cpu_get_flag(FL_SIGN); " DF="; cpu_get_flag(FL_DEBUG);
     print ""
-end sub
+
+end sub ' cpu_dump_state()
 
 sub cpu_set_flag(flag as ushort)
     cpu_state.fl = cpu_state.fl or flag
-end sub
+end sub ' cpu_set_flag()
 
 sub cpu_clear_flag(flag as ushort)
     if cpu_get_flag(flag) = 1 then
         cpu_state.fl = (not cpu_state.fl) and flag
     end if
-end sub
+end sub ' cpu_clear_flag()
 
 function cpu_get_flag(flag as ushort) as ubyte
     if (cpu_state.fl and flag) = flag then
@@ -273,15 +295,15 @@ function cpu_get_flag(flag as ushort) as ubyte
     else
         return 0
     end if
-end function
+end function ' cpu_get_flag()
 
 function cpu_get_pl() as ubyte
     return (cpu_state.fl and PL_MASK) shr 9
-end function
+end function ' cpu_get_pl()
 
 sub cpu_set_pl(privilege_level as ubyte)
     cpu_state.fl or= (privilege_level shl 9)
-end sub
+end sub ' cpu_set_pl()
 
 sub cpu_set_reg_alpha(register as string, value as ushort)
     
@@ -337,7 +359,7 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
 	    case REG_GP
 	    	 cpu_state.gp = value
     end select
-end sub
+end sub ' cpu_set_reg_alpha()
 
 function cpu_get_reg_alpha(register as string) as ushort
 
@@ -394,4 +416,4 @@ function cpu_get_reg_alpha(register as string) as ushort
 	    	 return cpu_state.gp
     end select
 
-end function
+end function ' cpu_get_reg_alpha()

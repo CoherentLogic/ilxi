@@ -493,7 +493,7 @@ function asm_operand_count(opcode as ubyte) as ubyte
     select case opcode
         case OP_COPY, OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_SHL, OP_SHR, OP_OR, OP_NOT, OP_AND, OP_XOR, OP_EQV
             return 2
-        case OP_CMP
+        case OP_CMP, OP_LCALL
             return 2
         case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH, OP_POP
             return 1
@@ -512,7 +512,6 @@ function asm_disassemble(page as ushort, offset as ushort) as string
     dim operands() as t_operand
     dim operand_count as ubyte
     dim i as ushort
-
     dim displacement as ushort
     dim ops_following as ubyte
     dim actual_amod as ubyte
@@ -529,8 +528,6 @@ function asm_disassemble(page as ushort, offset as ushort) as string
 
     redim operands(operand_count) as t_operand
 
-
-
     for i = 1 to operand_count
 
         offset = offset + 1        
@@ -540,8 +537,6 @@ function asm_disassemble(page as ushort, offset as ushort) as string
         offset = offset + 1
 
         actual_amod = asm_amod_amod(operands(i).amod)
-
-'print "for operand "; i; ", got amod byte of "; actual_amod; " (binary "; bin(actual_amod); ")"
 
         displacement = asm_decode_disp(asm_amod_disp(operands(i).amod))
 
