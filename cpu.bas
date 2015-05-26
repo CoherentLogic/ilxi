@@ -43,132 +43,193 @@ sub init_cpu()
 end sub
 
 sub cpu()
-    dim opcode as ubyte
-    dim srcmod as ubyte
-    dim srcbytes as ubyte
-    dim src as integer
-    dim dstmod as ubyte
-    dim dstbytes as ubyte
-    dim dst as integer
-    dim inst_size as ubyte
 
-    dim tmp as t_operand
-    tmp = asm_encode_address(1, "%ga")
-    tmp = asm_encode_address(1, "#05")
-    tmp = asm_encode_address(1, "#1024")
-    tmp = asm_encode_address(1, "(%ga)+4")
-    tmp = asm_encode_address(1, "(#05)+4")
-    tmp = asm_encode_address(1, "(#1024)+4")
+    dim opcode as ubyte
+    dim inst_pc as ushort
+    dim op_count as ubyte
+    dim i as ubyte
+    dim displacement as ushort
+    
+    dim operands() as t_operand
+    dim address_mode as ubyte
 
     cpu_clear_flag FL_HALT
 
+    ' main cpu loop
     do	  
-   	  opcode = cpu_fetch()
-	  inst_size = cpu_decode(opcode)
-                        
+        inst_pc = cpu_state.pc
 
-	  select case opcode
-	  	 case OP_COPY		 		 
+        if cpu_get_flag(FL_DEBUG) then
+            print ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":";
+            print ilxi_pad_left(hex(inst_pc), "0", 4); " ";
+
+            print asm_disassemble(cpu_state.cp, inst_pc)
+        end if
+
+        opcode = cpu_fetch()
+
+        op_count = asm_operand_count(opcode)                        
+        redim operands(op_count) as t_operand
+
+        for i = 1 to op_count
+            operands(i).amod = cpu_fetch()
+            address_mode = asm_amod_amod(operands(i).amod)
+            displacement = asm_decode_disp(asm_amod_disp(operands(i).amod))
+
+            select case address_mode
+                case AM_IMM
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).high_byte = cpu_fetch()
+                    operands(i).byte_count = 2
+                    operands(i).immediate = 1
+                case AM_REGD
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).byte_count = 1
+                    operands(i).displacement = displacement
+                    operands(i).register = 1
+                    operands(i).has_displacement = 1
+                case AM_MEMD
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).high_byte = cpu_fetch()
+                    operands(i).byte_count = 2
+                    operands(i).displacement = displacement
+                    operands(i).memory = 1
+                    operands(i).has_displacement = 1
+                case AM_REGDD
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).byte_count = 1
+                    operands(i).displacement = displacement
+                    operands(i).register = 1
+                    operands(i).has_displacement = 1
+                case AM_MEMDD
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).high_byte = cpu_fetch()
+                    operands(i).byte_count = 2
+                    operands(i).displacement = displacement
+                    operands(i).has_displacement = 1
+                    operands(i).memory = 1
+                case AM_REGI
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).byte_count = 1
+                    operands(i).register = 1
+                    operands(i).indirect = 1
+                case AM_MEMI
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).high_byte = cpu_fetch()
+                    operands(i).byte_count = 2
+                    operands(i).memory = 1
+                    operands(i).indirect = 1
+                case AM_REGID
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).byte_count = 1
+                    operands(i).displacement = displacement
+                    operands(i).register = 1
+                    operands(i).indirect = 1
+                    operands(i).has_displacement = 1
+                case AM_MEMID
+                    operands(i).low_byte = cpu_fetch()
+                    operands(i).high_byte = cpu_fetch()
+                    operands(i).byte_count = 2
+                    operands(i).displacement = displacement
+                    operands(i).memory = 1
+                    operands(i).has_displacement = 1
+                    operands(i).indirect = 1
+            end select                          
+        next i
+
+        select case opcode
+            case OP_COPY		 		 
 		 
-		 case OP_ADD
+            case OP_ADD
 		 
-		 case OP_SUB
+            case OP_SUB
 		 
-		 case OP_MUL
+            case OP_MUL
 		 
-		 case OP_DIV
+            case OP_DIV
 		 
-		 case OP_SHL
+            case OP_SHL
 
-		 case OP_SHR
+            case OP_SHR
 
-		 case OP_OR
+            case OP_OR
 		 
-		 case OP_NOT
+            case OP_NOT
 
-		 case OP_AND
+            case OP_AND
 
-		 case OP_XOR
+            case OP_XOR
 
-		 case OP_EQV
+            case OP_EQV
 
-		 case OP_CMP
+            case OP_CMP
 
-		 case OP_BRANCH
+            case OP_BRANCH
 
-		 case OP_BEQ
+            case OP_BEQ
 
-         case OP_BNE
+            case OP_BNE
 
-		 case OP_BLT
+            case OP_BLT
 
-		 case OP_BGT
+            case OP_BGT
 		 
-		 case OP_SCALL
+            case OP_SCALL
 
-		 case OP_LCALL
+            case OP_LCALL
 
-		 case OP_ICALL
+            case OP_ICALL
 
-		 case OP_SRET
+            case OP_SRET
 		 
-		 case OP_LRET
+            case OP_LRET
 
-		 case OP_IRET
+            case OP_IRET
 
-		 case OP_PUSH
+            case OP_PUSH
 
-		 case OP_POP
+            case OP_POP
 
-	  	 case OP_NOP
+            case OP_NOP
 		      
-	  	 case OP_HLT
-		      cpu_set_flag FL_HALT
-		 case else
+            case OP_HLT
+                cpu_set_flag FL_HALT
+            case else
 
-          end select
+        end select
+
+        if cpu_get_flag(FL_TRACE) then cpu_dump_state
 	  
-	  if cpu_state.pc >= (PAGESIZE - 1) then
-	     cpu_set_flag FL_HALT
-	     cpu_state.ec = 0
-	     cpu_state.es = 0
-	  end if
+        if cpu_state.pc >= (PAGESIZE - 1) then
+            cpu_set_flag FL_HALT
+            cpu_state.ec = 0
+            cpu_state.es = 0
+        end if
 
-	  if cpu_get_flag(FL_HALT) then
-	     if cpu_state.es > 0 then
-	     	print "cpu(): trap "; trim(str(cpu_state.ec)); " at pc = "; trim(str(cpu_state.pc))
-	     else
-	        print "cpu(): halt at pc = "; trim(str(cpu_state.pc))
-	     end if
+        if cpu_get_flag(FL_HALT) then
+            if cpu_state.es > 0 then
+                print "cpu(): trap "; trim(str(cpu_state.ec)); " at pc = "; trim(str(cpu_state.pc))
+            else
+                print "cpu(): halt at "; ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":"; ilxi_pad_left(hex(inst_pc), "0", 4)
+            end if
 	     
-	     exit do
-	  end if
+            exit do
+        end if
 
-	  if (cpu_state.pc + inst_size) <= PAGESIZE then	 
-	     cpu_state.pc = cpu_state.pc + inst_size
-	  end if
-
-	  if cpu_get_flag(FL_TRACE) then cpu_dump_state
-      if cpu_get_flag(FL_DEBUG) then
-        print ""
-        print ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":";
-        print ilxi_pad_left(hex(cpu_state.pc), "0", 4); " ";
-
-        print asm_disassemble(cpu_state.cp, cpu_state.pc)
-
-        exit do
-      end if        
+        if cpu_get_flag(FL_DEBUG) then exit do
+        
     loop
 
     
 end sub
 
 function cpu_fetch() as ubyte
-	 return st_read_byte(cpu_state.cp, cpu_state.pc)
-end function
+    dim t_byte as ubyte = 0
+    t_byte = st_read_byte(cpu_state.cp, cpu_state.pc)
 
-function cpu_decode(opcode as ubyte) as ubyte
-	 return 1
+    cpu_state.pc += 1
+
+    return t_byte
 end function
 
 sub cpu_dump_state()
@@ -238,7 +299,7 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
 	    case REG_DP
 	    	 cpu_state.dp = value
         case REG_EP
-            cpu_state.ep = value
+             cpu_state.ep = value
 	    case REG_SP
 	    	 cpu_state.sp = value
 	    case REG_SO

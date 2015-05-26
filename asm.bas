@@ -495,13 +495,13 @@ function asm_operand_count(opcode as ubyte) as ubyte
             return 2
         case OP_CMP
             return 2
-        case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH
+        case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH, OP_POP
             return 1
         case OP_LCALL
             return 2
         case OP_BEQ, OP_BNE, OP_BZ, OP_BLT, OP_BGT
             return 1
-        case OP_SRET, OP_LRET, OP_IRET, OP_POP, OP_NOP, OP_HLT
+        case OP_SRET, OP_LRET, OP_IRET, OP_NOP, OP_HLT
             return 0
     end select
 end function ' asm_operand_count()

@@ -272,6 +272,5 @@ declare function cpu_get_pl() as ubyte
 declare sub cpu_set_pl(privilege_level as ubyte)
 declare function cpu_get_flag(flag as ushort) as ubyte
 declare function cpu_fetch() as ubyte
-declare function cpu_decode(opcode as ubyte) as ubyte
 declare sub cpu_set_reg_alpha(register as string, value as ushort)
 declare function cpu_get_reg_alpha(register as string) as ushort
