@@ -2,6 +2,9 @@
 ' cpu.bi
 '
 
+#define MSB_MASK &HFF00
+#define LSB_MASK &HFF
+
 '
 ' Instruction Format
 '
@@ -155,6 +158,19 @@
 #define REG_GO "go"
 #define REG_GP "gp"
 
+#define REG_LA "la"
+#define REG_LB "lb"
+#define REG_LC "lc"
+#define REG_LD "ld"
+#define REG_LE "le"
+
+#define REG_HA "ha"
+#define REG_HB "hb"
+#define REG_HC "hc"
+#define REG_HD "hd"
+#define REG_HE "he"
+
+
 '
 ' register encodings (numeric)
 '
@@ -187,6 +203,18 @@
 #define NREG_GN 53
 #define NREG_GO 54
 #define NREG_GP 55
+
+#define NREG_LA 60
+#define NREG_LB 61
+#define NREG_LC 62
+#define NREG_LD 63
+#define NREG_LE 64
+
+#define NREG_HA 65
+#define NREG_HB 66
+#define NREG_HC 67
+#define NREG_HD 68
+#define NREG_HE 69
 
 '
 ' flags
@@ -274,3 +302,5 @@ declare function cpu_get_flag(flag as ushort) as ubyte
 declare function cpu_fetch() as ubyte
 declare sub cpu_set_reg_alpha(register as string, value as ushort)
 declare function cpu_get_reg_alpha(register as string) as ushort
+declare sub cpu_set_reg(register as ubyte, value as ushort)
+declare function cpu_get_reg(register as ubyte) as ushort

@@ -1,9 +1,20 @@
-OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o
+VM_OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o
+XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o
 FBCFLAGS = -g 
 #-d LEXDEBUG
 
-ilxi: $(OBJS)
-	fbc $(FBCFLAGS) -x ilxi $(OBJS)
+vm: ilxi
+
+assembler: xiasm  
+
+xiasm: $(XIASM_OBJS)
+	fbc $(FBCFLAGS) -x xiasm $(XIASM_OBJS)
+
+xiasm.o: xiasm.bas
+	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
+
+ilxi: $(VM_OBJS)
+	fbc $(FBCFLAGS) -x ilxi $(VM_OBJS)
 
 alu.o: alu.bas 
 	fbc $(FBCFLAGS) -o alu.o -c alu.bas
@@ -31,6 +42,9 @@ inst.o: inst.bas
 
 ilxi.o: ilxi.bas
 	fbc -m ilxi $(FBCFLAGS) -o ilxi.o -c ilxi.bas
+
+util.o: util.bas
+	fbc $(FBCFLAGS) -o util.o -c util.bas
 
 clean:
 	rm -f *.o ilxi

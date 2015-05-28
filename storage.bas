@@ -27,3 +27,25 @@ sub st_write_byte(page as integer, offset as integer, value as byte)
 
 	mem(page).contents(offset) = value
 end sub
+
+sub st_load_page(file as string, page as integer)
+    dim file_handle as integer
+
+    file_handle = freefile()
+    open file for binary as #file_handle
+
+    get #file_handle, , mem(page)
+
+    close #file_handle
+end sub
+
+sub st_save_page(file as string, page as integer)
+    dim file_handle as integer
+
+    file_handle = freefile()
+    open file for binary as #file_handle
+    
+    put #file_handle, , mem(page)
+
+    close #file_handle
+end sub

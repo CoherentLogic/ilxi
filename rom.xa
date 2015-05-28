@@ -1,0 +1,73 @@
+; 
+; rom.xa
+;
+;  ILXI ROM
+;
+ORIGIN MAIN
+PROGRAM SEGMENT CODE "ROMCODE.BIN"
+
+SYMBOL ZSTRING NAME "ILXIM ROM Monitor"
+SYMBOL WORD VID_PAGE 3
+SYMBOL WORD VID_OFFSET 0
+
+LABEL MAIN
+    ; 
+    ; main entry point
+    ;
+    push %ep
+    push %ga
+    push %gb
+    push %gc
+
+    copy %ga,{NAME}
+    copy %ep,{VID_PAGE}
+    copy %gb,{VID_OFFSET}
+ 
+    scall {STRCPY}
+
+    pop %gc
+    pop %gb
+    pop %ga
+    pop %ep
+
+    hlt
+
+LABEL STRCPY
+    ;
+    ; STRCPY
+    ;  DP:GA source 
+    ;  EP:GB target
+    ;
+
+LABEL STRCPY_TOP    
+
+    ; copy the source byte to %gc
+    copy %gc,(%ga)
+
+    ; exit if null byte encountered
+    cmp %gc,0
+    beq {STRCPY_END}
+
+    ; save dp and set dp = ep
+    push %dp
+    copy %dp,%ep
+
+    ; copy %gc to the target
+    copy (%gb),%gc
+    
+    pop %dp
+
+    add %ga,1
+    add %gb,1
+    branch {STRCPY_TOP}
+
+LABEL STRCPY_END
+    ; return
+    lret
+      
+
+
+
+
+
+    

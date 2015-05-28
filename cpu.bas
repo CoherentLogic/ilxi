@@ -5,7 +5,7 @@
 #include "cpu.bi"
 #include "storage.bi"
 #include "asm.bi"
-#include "ilxi.bi"
+#include "util.bi"
 #include "inst.bi"
 
 sub init_cpu()
@@ -261,20 +261,20 @@ sub cpu_dump_state()
     print ""
     print "Page Size:", PAGESIZE,"Page Count:",PAGECOUNT
     print ""
-    print "PC "; x.pc, "EC "; x.ec, "ES "; x.es, "CP "; x.cp, "DP "; x.dp
-    print "EP "; x.ep, "SP "; x.sp, "SO "; x.so, "FL "; x.fl
+    print "PC "; ilxi_pad_left(hex(x.pc),"0",4), "EC "; ilxi_pad_left(hex(x.ec),"0",4), "ES "; ilxi_pad_left(hex(x.es),"0",4), "CP "; ilxi_pad_left(hex(x.cp),"0",4), "DP "; ilxi_pad_left(hex(x.dp),"0",4)
+    print "EP "; ilxi_pad_left(hex(x.ep),"0",4), "SP "; ilxi_pad_left(hex(x.sp),"0",4), "SO "; ilxi_pad_left(hex(x.so),"0",4), "FL "; ilxi_pad_left(hex(x.fl),"0",4)
     print ""
-    print "GA "; x.ga, "GB "; x.gb, "GC "; x.gc, "GD "; x.gd, "GE "; x.ge 
-    print "GF "; x.gf, "GG "; x.gg, "GH "; x.gh, "GI "; x.gi, "GJ "; x.gj 
-    print "GK "; x.gk, "GL "; x.gl, "GM "; x.gm, "GN "; x.gn, "GO "; x.go
-    print "GP "; x.gp
+    print "GA "; ilxi_pad_left(hex(x.ga),"0",4), "GB "; ilxi_pad_left(hex(x.gb),"0",4), "GC "; ilxi_pad_left(hex(x.gc),"0",4), "GD "; ilxi_pad_left(hex(x.gd),"0",4), "GE "; ilxi_pad_left(hex(x.ge),"0",4)
+    print "GF "; ilxi_pad_left(hex(x.gf),"0",4), "GG "; ilxi_pad_left(hex(x.gg),"0",4), "GH "; ilxi_pad_left(hex(x.gh),"0",4), "GI "; ilxi_pad_left(hex(x.gi),"0",4), "GJ "; ilxi_pad_left(hex(x.gj),"0",4)
+    print "GK "; ilxi_pad_left(hex(x.gk),"0",4), "GL "; ilxi_pad_left(hex(x.gl),"0",4), "GM "; ilxi_pad_left(hex(x.gm),"0",4), "GN "; ilxi_pad_left(hex(x.gn),"0",4), "GO "; ilxi_pad_left(hex(x.go),"0",4)
+    print "GP "; ilxi_pad_left(hex(x.gp),"0",4)
     print ""
     print "Flags:"
     print ""
     print "HF="; cpu_get_flag(FL_HALT); " TF="; cpu_get_flag(FL_TRACE); " OF="; cpu_get_flag(FL_OVERFLOW);
     print " CF="; cpu_get_flag(FL_CARRY); " IF="; cpu_get_flag(FL_INTERRUPT); " EF="; cpu_get_flag(FL_EQUALITY);
     print " LF="; cpu_get_flag(FL_LESSTHAN); " GF="; cpu_get_flag(FL_GREATERTHAN); " ZF="; cpu_get_flag(FL_ZERO);
-    print " PL=0 PF="; cpu_get_flag(FL_PARITY); " SF="; cpu_get_flag(FL_SIGN); " DF="; cpu_get_flag(FL_DEBUG);
+    print " PL="; cpu_get_pl(); " PF="; cpu_get_flag(FL_PARITY); " SF="; cpu_get_flag(FL_SIGN); " DF="; cpu_get_flag(FL_DEBUG);
     print ""
 
 end sub ' cpu_dump_state()
@@ -358,6 +358,30 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
 	    	 cpu_state.go = value
 	    case REG_GP
 	    	 cpu_state.gp = value
+        
+        ' LSB of regs GA through GE
+        case REG_LA
+            cpu_state.ga = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HA))
+        case REG_LB
+            cpu_state.gb = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HB))
+        case REG_LC
+            cpu_state.gc = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HC))
+        case REG_LD
+            cpu_state.gd = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HD))
+        case REG_LE
+            cpu_state.ge = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HE))
+
+        'MSB of regs GA through GEs
+        case REG_HA
+            cpu_state.ga = asm_bytes_to_ushort(cpu_get_reg(NREG_LA), cubyte(value))
+        case REG_HB
+            cpu_state.gb = asm_bytes_to_ushort(cpu_get_reg(NREG_LB), cubyte(value))
+        case REG_HC
+            cpu_state.gc = asm_bytes_to_ushort(cpu_get_reg(NREG_LC), cubyte(value))
+        case REG_HD
+            cpu_state.gd = asm_bytes_to_ushort(cpu_get_reg(NREG_LD), cubyte(value))
+        case REG_HE
+            cpu_state.ge = asm_bytes_to_ushort(cpu_get_reg(NREG_LE), cubyte(value))
     end select
 end sub ' cpu_set_reg_alpha()
 
@@ -414,6 +438,190 @@ function cpu_get_reg_alpha(register as string) as ushort
 	    	 return cpu_state.go
 	    case REG_GP
 	    	 return cpu_state.gp
+
+        case REG_LA
+            return (cpu_state.ga and LSB_MASK)
+        case REG_LB
+            return (cpu_state.gb and LSB_MASK)
+        case REG_LC
+            return (cpu_state.gc and LSB_MASK)
+        case REG_LD
+            return (cpu_state.gd and LSB_MASK)
+        case REG_LE
+            return (cpu_state.ge and LSB_MASK)
+
+        case REG_HA
+            return (cpu_state.ga and MSB_MASK) shr 8
+        case REG_HB
+            return (cpu_state.gb and MSB_MASK) shr 8
+        case REG_HC
+            return (cpu_state.gc and MSB_MASK) shr 8
+        case REG_HD
+            return (cpu_state.gd and MSB_MASK) shr 8
+        case REG_HE
+            return (cpu_state.ge and MSB_MASK) shr 8
+
     end select
 
 end function ' cpu_get_reg_alpha()
+
+sub cpu_set_reg(register as ubyte, value as ushort)
+    
+    select case register
+	    case NREG_PC 	 
+	    	 cpu_state.pc = value
+	    case NREG_EC
+	    	 cpu_state.ec = value
+	    case NREG_ES
+   	    	 cpu_state.es = value
+        case NREG_FL
+             cpu_state.fl = value
+	    case NREG_CP
+	    	 cpu_state.cp = value
+	    case NREG_DP
+	    	 cpu_state.dp = value
+        case NREG_EP
+             cpu_state.ep = value
+	    case NREG_SP
+	    	 cpu_state.sp = value
+	    case NREG_SO
+	    	 cpu_state.so = value
+	    case NREG_GA
+	    	 cpu_state.ga = value
+	    case NREG_GB
+	    	 cpu_state.gb = value
+	    case NREG_GC
+	    	 cpu_state.gc = value
+	    case NREG_GD
+	    	 cpu_state.gd = value
+	    case NREG_GE
+	    	 cpu_state.ge = value
+	    case NREG_GF
+	    	 cpu_state.gf = value
+	    case NREG_GG
+	    	 cpu_state.gg = value
+	    case NREG_GH
+	    	 cpu_state.gh = value
+	    case NREG_GI
+	    	 cpu_state.gi = value
+	    case NREG_GJ
+	    	 cpu_state.gj = value
+	    case NREG_GK
+	    	 cpu_state.gk = value
+	    case NREG_GL
+	    	 cpu_state.gl = value
+	    case NREG_GM
+	    	 cpu_state.gm = value
+	    case NREG_GN
+	    	 cpu_state.gn = value
+	    case NREG_GO
+	    	 cpu_state.go = value
+	    case NREG_GP
+	    	 cpu_state.gp = value
+        
+        ' LSB of regs GA through GE
+        case NREG_LA
+            cpu_state.ga = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HA))
+        case NREG_LB
+            cpu_state.gb = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HB))
+        case NREG_LC
+            cpu_state.gc = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HC))
+        case NREG_LD
+            cpu_state.gd = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HD))
+        case NREG_LE
+            cpu_state.ge = asm_bytes_to_ushort(cubyte(value), cpu_get_reg(NREG_HE))
+
+        'MSB of regs GA through GEs
+        case NREG_HA
+            cpu_state.ga = asm_bytes_to_ushort(cpu_get_reg(NREG_LA), cubyte(value))
+        case NREG_HB
+            cpu_state.gb = asm_bytes_to_ushort(cpu_get_reg(NREG_LB), cubyte(value))
+        case NREG_HC
+            cpu_state.gc = asm_bytes_to_ushort(cpu_get_reg(NREG_LC), cubyte(value))
+        case NREG_HD
+            cpu_state.gd = asm_bytes_to_ushort(cpu_get_reg(NREG_LD), cubyte(value))
+        case NREG_HE
+            cpu_state.ge = asm_bytes_to_ushort(cpu_get_reg(NREG_LE), cubyte(value))
+
+    end select
+end sub ' cpu_set_reg()
+
+function cpu_get_reg(register as ubyte) as ushort
+
+    select case register
+	    case NREG_PC 	 
+	    	 return cpu_state.pc 
+	    case NREG_EC
+	    	 return cpu_state.ec
+	    case NREG_ES
+   	    	 return cpu_state.es
+        case NREG_FL
+             return cpu_state.fl
+	    case NREG_CP
+	    	 return cpu_state.cp
+	    case NREG_DP
+	    	 return cpu_state.dp
+        case NREG_EP
+             return cpu_state.ep
+	    case NREG_SP
+	    	 return cpu_state.sp
+	    case NREG_SO
+	    	 return cpu_state.so
+	    case NREG_GA
+	    	 return cpu_state.ga
+	    case NREG_GB
+	    	 return cpu_state.gb
+	    case NREG_GC
+	    	 return cpu_state.gc
+	    case NREG_GD
+	    	 return cpu_state.gd
+	    case NREG_GE
+	    	 return cpu_state.ge
+	    case NREG_GF
+	    	 return cpu_state.gf
+	    case NREG_GG
+	    	 return cpu_state.gg
+	    case NREG_GH
+	    	 return cpu_state.gh
+	    case NREG_GI
+	    	 return cpu_state.gi
+	    case NREG_GJ
+	    	 return cpu_state.gj
+	    case NREG_GK
+	    	 return cpu_state.gk
+	    case NREG_GL	
+	    	 return cpu_state.gl
+	    case NREG_GM
+	    	 return cpu_state.gm
+	    case NREG_GN
+	    	 return cpu_state.gn
+	    case NREG_GO
+	    	 return cpu_state.go
+	    case NREG_GP
+	    	 return cpu_state.gp
+
+        case NREG_LA
+            return (cpu_state.ga and LSB_MASK)
+        case NREG_LB
+            return (cpu_state.gb and LSB_MASK)
+        case NREG_LC
+            return (cpu_state.gc and LSB_MASK)
+        case NREG_LD
+            return (cpu_state.gd and LSB_MASK)
+        case NREG_LE
+            return (cpu_state.ge and LSB_MASK)
+
+        case NREG_HA
+            return (cpu_state.ga and MSB_MASK) shr 8
+        case NREG_HB
+            return (cpu_state.gb and MSB_MASK) shr 8
+        case NREG_HC
+            return (cpu_state.gc and MSB_MASK) shr 8
+        case NREG_HD
+            return (cpu_state.gd and MSB_MASK) shr 8
+        case NREG_HE
+            return (cpu_state.ge and MSB_MASK) shr 8
+
+    end select
+
+end function ' cpu_get_reg()

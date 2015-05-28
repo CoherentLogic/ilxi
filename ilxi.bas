@@ -7,6 +7,7 @@
 #include "lexer.bi"
 #include "storage.bi"
 #include "asm.bi"
+#include "util.bi"
 
 startup
 
@@ -38,6 +39,30 @@ sub cli()
 	    cmd_name = get_lexer_entry(0).strval
 	
 	    select case cmd_name
+            case "loadpage", "lp"
+                dim img_file as string = get_lexer_entry(1).strval
+                dim page_index as integer
+
+                
+                if get_lexer_entry(2).lexer_class = LC_BYTE then
+                    page_index = get_lexer_entry(2).byteval
+                else
+                    page_index = get_lexer_entry(2).intval
+                end if
+
+                st_load_page img_file, page_index
+            case "savepage", "sp"
+                dim img_file as string = get_lexer_entry(1).strval
+                dim page_index as integer
+
+                
+                if get_lexer_entry(2).lexer_class = LC_BYTE then
+                    page_index = get_lexer_entry(2).byteval
+                else
+                    page_index = get_lexer_entry(2).intval
+                end if
+
+                st_save_page img_file, page_index
             case "assemble"
                 dim le_origin as lexer_entry
                 dim origin_addr as ushort
@@ -149,7 +174,7 @@ sub cli()
 	            setm_value = le_setm_value.byteval		 
 	
 	            st_write_byte cpu_state.dp, setm_addr, setm_value
-	        case "dumpcpu"
+	        case "dumpcpu","d"
 	       	    cpu_dump_state
 	        case "trace"	       	  		    
 	            if get_lexer_entry(1).byteval = 0 then
@@ -179,18 +204,3 @@ sub ilxi_setr(register as string, value as integer)
     cpu_set_reg_alpha lcase(register), value
 end sub
 
-function ilxi_pad_left(input_str as string, pad_char as string, total_size as integer) as string
-	 dim output_str as string
-	 dim diff as integer
-	 dim i as integer
-
-	 diff = total_size - len(input_str)
-	 
-	 for i = 1 to diff
-	     output_str = output_str & pad_char
-	 next
-	
- 	 output_str = output_str & input_str
-	 
-	 return output_str
-end function

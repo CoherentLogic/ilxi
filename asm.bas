@@ -8,9 +8,9 @@
 #include "cpu.bi"
 #include "lexer.bi"
 #include "storage.bi"
-#include "ilxi.bi"
+#include "util.bi"
 
-dim shared asm_offset as ushort
+
 
 function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
     '  7 6543 210
@@ -252,6 +252,26 @@ function asm_encode_register(register_name as string) as ubyte
             return NREG_GO
         case "gp"
             return NREG_GP
+        case "la"
+            return NREG_LA
+        case "lb"
+            return NREG_LB
+        case "lc"
+            return NREG_LC
+        case "ld"
+            return NREG_LD
+        case "le"
+            return NREG_LE
+        case "ha"
+            return NREG_HA
+        case "hb"
+            return NREG_HB
+        case "hc"
+            return NREG_HC
+        case "hd"
+            return NREG_HD
+        case "he"
+            return NREG_HE
     end select       
 end function ' asm_encode_register()
 
@@ -307,6 +327,26 @@ function asm_decode_register(reg as ubyte) as string
             return "go"
         case NREG_GP
             return "gp"
+        case NREG_LA
+            return "la"
+        case NREG_LB
+            return "lb"
+        case NREG_LC
+            return "lc"
+        case NREG_LD
+            return "ld"
+        case NREG_LE
+            return "le"
+        case NREG_HA
+            return "ha"
+        case NREG_HB
+            return "hb"
+        case NREG_HC
+            return "hc"
+        case NREG_HD
+            return "hd"
+        case NREG_HE
+            return "he"
     end select
 end function ' asm_decode_register()
 
