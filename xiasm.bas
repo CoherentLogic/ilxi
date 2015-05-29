@@ -72,6 +72,7 @@ for i = 1 to line_count
     
             
     select case cur_arg
+        case "ORIGIN"
         case "PROGRAM"
             output_file_name = get_lexer_entry(3).strval
         case "SYMBOL"            

@@ -3,6 +3,8 @@ XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o
 FBCFLAGS = -g 
 #-d LEXDEBUG
 
+all: vm assembler
+
 vm: ilxi
 
 assembler: xiasm  
@@ -47,4 +49,4 @@ util.o: util.bas
 	fbc $(FBCFLAGS) -o util.o -c util.bas
 
 clean:
-	rm -f *.o ilxi
+	rm -f *.o ilxi xiasm
