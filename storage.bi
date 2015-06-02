@@ -11,3 +11,5 @@ declare function st_read_byte(page as integer, offset as integer) as byte
 declare sub st_write_byte(page as integer, offset as integer, value as byte)
 declare sub st_load_page(file as string, page as integer)
 declare sub st_save_page(file as string, page as integer)
+declare sub st_write_word(page as integer, offset as integer, wordval as ushort)
+declare function st_read_word(page as integer, offset as integer) as ushort

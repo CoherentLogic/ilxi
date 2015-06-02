@@ -18,10 +18,12 @@ type t_operand
     immediate as ubyte
     has_displacement as ubyte
     indirect as ubyte
+
+    data_type as ubyte ' 0 = byte, 1 = word
 end type
 
 declare function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
-declare function asm_amod_following(amod as ubyte) as ubyte
+declare function asm_amod_datatype(amod as ubyte) as ubyte
 declare function asm_amod_amod(amod as ubyte) as ubyte
 declare function asm_amod_disp(amod as ubyte) as ubyte
 declare function asm_decode_disp(disp as ubyte) as ushort

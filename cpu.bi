@@ -57,7 +57,6 @@
 #define OP_DATA	  000
 
 #define OP_COPY   001
-
 #define OP_ADD    003
 #define OP_SUB    004
 #define OP_MUL	  005
@@ -140,6 +139,11 @@
 #define REG_EP "ep"
 #define REG_SP "sp"
 #define REG_SO "so"
+#define REG_SS "ss"
+#define REG_DS "ds"
+
+#define REG_SI "si"
+#define REG_DI "di"
 
 #define REG_GA "ga"
 #define REG_GB "gb"
@@ -186,6 +190,11 @@
 #define NREG_EP 22
 #define NREG_SP 23
 #define NREG_SO 24
+#define NREG_SS 25
+#define NREG_DS 26
+
+#define NREG_SI 27
+#define NREG_DI 28
 
 #define NREG_GA 40
 #define NREG_GB 41
@@ -247,6 +256,12 @@
 #define PL_EXEC 2
 #define PL_USER 3
 
+'
+' data types
+'
+#define DT_BYTE 0
+#define DT_WORD 1
+
 type t_cpu_state            
                  
      pc as ushort	'program counter
@@ -260,6 +275,12 @@ type t_cpu_state
      ep as ushort   'extra page
      sp as ushort   'stack page
      so as ushort 	'stack offset
+    
+     ss as ushort   'source page
+     ds as ushort   'dest page
+    
+     si as ushort   'source index
+     di as ushort   'dest index
 
      ga as ushort	'general a
      gb as ushort	'general b
@@ -304,3 +325,7 @@ declare sub cpu_set_reg_alpha(register as string, value as ushort)
 declare function cpu_get_reg_alpha(register as string) as ushort
 declare sub cpu_set_reg(register as ubyte, value as ushort)
 declare function cpu_get_reg(register as ubyte) as ushort
+declare sub cpu_push_byte(byteval as ubyte)
+declare function cpu_pop_byte() as ubyte
+declare sub cpu_push_word(wordval as ushort)
+declare function cpu_pop_word() as ushort

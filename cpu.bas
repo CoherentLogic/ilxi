@@ -21,7 +21,13 @@ sub init_cpu()
 		.dp = 0
         .ep = 0
 		.sp = 0
-		.so = 0
+		.so = PAGESIZE - 1
+
+        .ss = 0
+        .ds = 0
+    
+        .si = 0
+        .di = 0
 		
 		.ga = 0
 		.gb = 0
@@ -53,6 +59,7 @@ sub cpu()
     
     dim operands() as t_operand
     dim address_mode as ubyte
+    dim data_type as ubyte
 
     cpu_clear_flag FL_HALT
 
@@ -74,6 +81,10 @@ sub cpu()
 
         for i = 1 to op_count
             operands(i).amod = cpu_fetch()
+
+
+            operands(i).data_type = asm_amod_datatype(operands(i).amod)
+    
             address_mode = asm_amod_amod(operands(i).amod)
             displacement = asm_decode_disp(asm_amod_disp(operands(i).amod))
 
@@ -253,6 +264,33 @@ function cpu_get_effective_address(operand as t_operand) as ushort
 
 end function ' cpu_get_effective_address()
 
+sub cpu_push_byte(byteval as ubyte)
+    st_write_byte cpu_state.sp, cpu_state.so, byteval
+    
+    cpu_state.so -= 1
+end sub ' cpu_push_byte()
+
+function cpu_pop_byte() as ubyte
+    dim retval as ubyte
+    
+    retval = st_read_byte(cpu_state.sp, cpu_state.so)
+    cpu_state.so += 1
+
+    return retval
+end function ' cpu_pop_byte()
+
+sub cpu_push_word(wordval as ushort)
+    st_write_word cpu_state.sp, cpu_state.so - 1, wordval
+    cpu_state.so -= 2
+end sub ' cpu_push_word()
+
+function cpu_pop_word() as ushort
+    dim retval as ushort
+
+    retval = st_read_word(cpu_state.sp, cpu_state.so)
+    cpu_state.so += 2
+end function ' cpu_pop_word()
+
 sub cpu_dump_state()
     dim x as t_cpu_state
     x = cpu_state
@@ -262,7 +300,8 @@ sub cpu_dump_state()
     print "Page Size:", PAGESIZE,"Page Count:",PAGECOUNT
     print ""
     print "PC "; ilxi_pad_left(hex(x.pc),"0",4), "EC "; ilxi_pad_left(hex(x.ec),"0",4), "ES "; ilxi_pad_left(hex(x.es),"0",4), "CP "; ilxi_pad_left(hex(x.cp),"0",4), "DP "; ilxi_pad_left(hex(x.dp),"0",4)
-    print "EP "; ilxi_pad_left(hex(x.ep),"0",4), "SP "; ilxi_pad_left(hex(x.sp),"0",4), "SO "; ilxi_pad_left(hex(x.so),"0",4), "FL "; ilxi_pad_left(hex(x.fl),"0",4)
+    print "EP "; ilxi_pad_left(hex(x.ep),"0",4), "SP "; ilxi_pad_left(hex(x.sp),"0",4), "SO "; ilxi_pad_left(hex(x.so),"0",4), "FL "; ilxi_pad_left(hex(x.fl),"0",4), "SS "; ilxi_pad_left(hex(x.ss),"0",4)
+    print "DS "; ilxi_pad_left(hex(x.ds),"0",4), "SI "; ilxi_pad_left(hex(x.ds),"0",4), "DI "; ilxi_pad_left(hex(x.di),"0",4)
     print ""
     print "GA "; ilxi_pad_left(hex(x.ga),"0",4), "GB "; ilxi_pad_left(hex(x.gb),"0",4), "GC "; ilxi_pad_left(hex(x.gc),"0",4), "GD "; ilxi_pad_left(hex(x.gd),"0",4), "GE "; ilxi_pad_left(hex(x.ge),"0",4)
     print "GF "; ilxi_pad_left(hex(x.gf),"0",4), "GG "; ilxi_pad_left(hex(x.gg),"0",4), "GH "; ilxi_pad_left(hex(x.gh),"0",4), "GI "; ilxi_pad_left(hex(x.gi),"0",4), "GJ "; ilxi_pad_left(hex(x.gj),"0",4)
@@ -326,6 +365,14 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
 	    	 cpu_state.sp = value
 	    case REG_SO
 	    	 cpu_state.so = value
+        case REG_SS
+             cpu_state.ss = value
+        case REG_DS
+             cpu_state.ds = value
+        case REG_SI
+             cpu_state.si = value
+        case REG_DI
+             cpu_state.di = value
 	    case REG_GA
 	    	 cpu_state.ga = value
 	    case REG_GB
@@ -406,6 +453,14 @@ function cpu_get_reg_alpha(register as string) as ushort
 	    	 return cpu_state.sp
 	    case REG_SO
 	    	 return cpu_state.so
+        case REG_SS
+            return cpu_state.ss
+        case REG_DS
+            return cpu_state.ds
+        case REG_SI
+            return cpu_state.si
+        case REG_DI
+            return cpu_state.di
 	    case REG_GA
 	    	 return cpu_state.ga
 	    case REG_GB
@@ -486,6 +541,14 @@ sub cpu_set_reg(register as ubyte, value as ushort)
 	    	 cpu_state.sp = value
 	    case NREG_SO
 	    	 cpu_state.so = value
+        case NREG_SS
+             cpu_state.ss = value
+        case NREG_DS
+             cpu_state.ds = value
+        case NREG_SI
+             cpu_state.si = value
+        case NREG_DI
+             cpu_state.di = value
 	    case NREG_GA
 	    	 cpu_state.ga = value
 	    case NREG_GB
@@ -567,6 +630,14 @@ function cpu_get_reg(register as ubyte) as ushort
 	    	 return cpu_state.sp
 	    case NREG_SO
 	    	 return cpu_state.so
+        case NREG_SS
+             return cpu_state.ss
+        case NREG_DS
+             return cpu_state.ds
+        case NREG_SI
+             return cpu_state.si
+        case NREG_DI
+             return cpu_state.di
 	    case NREG_GA
 	    	 return cpu_state.ga
 	    case NREG_GB

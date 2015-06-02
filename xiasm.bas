@@ -2,134 +2,154 @@
 '
 ' xiasm.bas
 '
-' ILXI external assembler
+' ILXIM external assembler
 '
 '
-
-#define SYMTAB_SIZE &HFF
 
 #include "asm.bi"
 #include "storage.bi"
 #include "lexer.bi"
 #include "util.bi"
+#include "xiasm.bi"
 
-type symtab_entry
-    e_key as string
-    e_type as string
-    wordval as ushort
-    byteval as ubyte
-    strval as string
+sub main(args as string)
 
-    offset as byte
+    dim arg_count as integer = 0
+    dim argi as integer = 0
 
-end type
+    arg_count = lex(args)
 
-declare sub install_symbol(sym_entry as symtab_entry)
-declare function lookup_symbol(key as string) as symtab_entry
-declare function expand_macros(input_string as string) as string
-
-dim shared symtab(SYMTAB_SIZE) as symtab_entry
-dim shared stidx as integer = 0
-
-dim page_idx as integer = 0
-
-dim arg_count as integer = 0
-dim cur_arg as string
-
-dim tmp_line as string
-dim input_lines() as string
-dim line_count as integer = 0
-
-dim input_file_number as integer
-dim input_file_name as string
-
-dim output_file_name as string
-
-input_file_name = command(-1)
-input_file_number = freefile()
-
-open input_file_name for input as #input_file_number
-
-do while not eof(input_file_number)
-
-    line input #1, tmp_line
-
-    tmp_line = trim(tmp_line)
-
-    if (len(tmp_line) > 0) and (left(tmp_line, 1) <> ";") then
-        line_count += 1
-        redim preserve input_lines(line_count) as string
+    for argi = 0 to arg_count - 1
+        do_asm get_lexer_entry(argi).strval, argi
+    next argi
     
-        input_lines(line_count) = ltrim(tmp_line)
-    end if
-loop
+    end
 
-dim t_sym as symtab_entry
-dim i as integer
-for i = 1 to line_count
-    arg_count = lex(input_lines(i))
-    cur_arg = get_lexer_entry(0).strval
-    
-            
-    select case cur_arg
-        case "ORIGIN"
-        case "PROGRAM"
-            output_file_name = get_lexer_entry(3).strval
-        case "SYMBOL"            
-            t_sym.e_key = get_lexer_entry(2).strval        
-            t_sym.e_type = get_lexer_entry(1).strval
-            t_sym.offset = asm_offset
-    
-            select case t_sym.e_type
-                case "ZSTRING"
-                    dim j as integer
-                    dim b as ubyte
+end sub
 
-                    t_sym.offset = asm_offset
+sub do_asm(filename as string)
+   
 
-                    for j = 1 to len(get_lexer_entry(3).strval)
+    dim line_count as integer = read_source_file(filename)
+
+    st_save_page output_file_name, 0    
+
+end sub
+
+function read_source_file(filename as string) as integer
 
 
-                        b = asc(mid(get_lexer_entry(3).strval, j, 1))    
-                        st_write_byte 0, asm_offset, b                            
+    redim input_lines(1) as string
 
-                        asm_offset += 1
-                    next j 
+    dim input_file_number as integer
+    dim line_count as integer = 0
+    dim tmp_line as string
 
-                    asm_offset += 1
-                    
-                    t_sym.strval = get_lexer_entry(3).strval
-                case "WORD"
-'                    st_write_byte 0, asm_offset, 
-                    asm_offset += 2
-                case "BYTE"
-                    t_sym.byteval = get_lexer_entry(3).byteval
-                    t_sym.offset = asm_offset
-                    st_write_byte 0, asm_offset, t_sym.byteval
-                    asm_offset += 1
-            end select
+    input_file_number = freefile()
+    open filename for input as #input_file_number
 
-            install_symbol t_sym
-        case "LABEL"
+	do while not eof(input_file_number)
+	
+	    line input #input_file_number, tmp_line
+	
+        '
+        ' ignore blank lines, leading and trailing whitespace, and comments
+        ' 
 
-        case else
-            dim ts as string
-            ts = expand_macros(input_lines(i))
+        if instr(tmp_line, ";") > 0 then
+            tmp_line = left(tmp_line, instr(tmp_line, ";") - 1)
+        end if
 
-            print ilxi_pad_left(hex(asm_offset), "0", 4); ": "; ts
+        tmp_line = trim(tmp_line)
 
-            asm_assemble ts
-    end select
-next i
+	    if (len(tmp_line) > 0) and (left(tmp_line, 1) <> ";") then
+	        line_count += 1
+	        redim preserve input_lines(line_count) as string
+	    
+	        input_lines(line_count) = ltrim(tmp_line)
+	    end if
+	loop
 
-st_save_page output_file_name, 0
+    close #input_file_number
 
+    return line_count	
+
+end function
+
+
+function pass(pass_number as integer) as byte
+
+    dim arg_count as integer = 0
+    dim cur_arg as string
+	dim t_sym as symtab_entry
+	dim i as integer
+
+	for i = 1 to ubound(input_lines)
+
+	    arg_count = lex(input_lines(i))
+	    cur_arg = get_lexer_entry(0).strval
+	    
+	            
+	    select case cur_arg
+	        case "ORIGIN"
+	        case "PROGRAM"
+	            output_file_name = get_lexer_entry(3).strval
+	        case "SYMBOL"            
+	            t_sym.e_key = get_lexer_entry(2).strval        
+	            t_sym.e_type = get_lexer_entry(1).strval
+	            t_sym.offset = asm_offset
+	    
+	            select case t_sym.e_type
+	                case "ZSTRING"
+	                    dim j as integer
+	                    dim b as ubyte
+	
+	                    t_sym.offset = asm_offset
+	
+	                    for j = 1 to len(get_lexer_entry(3).strval)
+	
+	
+	                        b = asc(mid(get_lexer_entry(3).strval, j, 1))    
+	                        st_write_byte 0, asm_offset, b                            
+	
+	                        asm_offset += 1
+	                    next j 
+	
+	                    asm_offset += 1
+	                    
+	                    t_sym.strval = get_lexer_entry(3).strval
+	                case "WORD"
+	'                    st_write_byte 0, asm_offset, 
+	                    asm_offset += 2
+	                case "BYTE"
+	                    t_sym.byteval = get_lexer_entry(3).byteval
+	                    t_sym.offset = asm_offset
+	                    st_write_byte 0, asm_offset, t_sym.byteval
+	                    asm_offset += 1
+	            end select
+	
+	            install_symbol t_sym
+	        case "LABEL"
+	            t_sym.e_key = get_lexer_entry(1).strval
+	            t_sym.e_type = "LABEL"
+	            t_sym.offset = asm_offset
+	        case else
+	            dim ts as string
+	            ts = expand_macros(input_lines(i))
+	
+	            print ilxi_pad_left(hex(asm_offset), "0", 4); ": "; ts
+	
+	            asm_assemble ts
+	    end select
+	next i
+	
+end function
 
 sub install_symbol(sym_entry as symtab_entry)
     stidx += 1
-    symtab(stidx) = sym_entry
+    redim preserve symtab(stidx) as symtab_entry
 
-    'print "INSTALL SYMBOL KEY="; sym_entry.e_key; " TYPE="; sym_entry.e_type; " OFFSET="; hex(sym_entry.offset)
+    symtab(stidx) = sym_entry
 end sub
 
 function lookup_symbol(key as string) as symtab_entry
@@ -148,6 +168,7 @@ end function
 function expand_macros(input_string as string) as string
 
     dim macro_name as string
+    dim label_name as string
     dim i as integer
     dim j as integer
     dim c as string = ""
@@ -156,11 +177,19 @@ function expand_macros(input_string as string) as string
     dim symbol as symtab_entry    
 
     dim in_macro as ubyte = 0
+    dim in_label as ubyte = 0
 
     for i = 1 to len(input_string)
         c = mid(input_string, i, 1)
 
         select case c
+            case "["
+                in_label = 1
+            case "]"
+                in_label = 0
+
+                symbol = lookup_symbol(label_name)
+
             case "{"
                 in_macro = 1
             case "}"
@@ -178,6 +207,8 @@ function expand_macros(input_string as string) as string
             case else
                 if in_macro = 1 then
                     macro_name &= c
+                elseif in_label = 1 then
+                    label_name &= c         
                 else
                     b &= c
                 end if
@@ -186,3 +217,6 @@ function expand_macros(input_string as string) as string
 
     return b
 end function
+
+main command()  'call main sub, passing to it the command line
+end

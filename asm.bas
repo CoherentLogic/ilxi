@@ -34,9 +34,9 @@ function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) a
     return t
 end function ' asm_encode_amod()
 
-function asm_amod_following(amod as ubyte) as ubyte
+function asm_amod_datatype(amod as ubyte) as ubyte
     return (amod and O_MASK) shr 7
-end function ' asm_amod_following()
+end function ' asm_amod_datatype()
 
 function asm_amod_amod(amod as ubyte) as ubyte
     return (amod and AMOD_MASK) shr 3
@@ -184,7 +184,7 @@ function asm_encode_address(ops_following as ubyte, addr_string as string) as t_
         addr_val = valint(addr_part)
 
         tmp.low_byte = addr_val and &HFF
-        tmp.high_byte = (addr_val and &HF00) shr 8
+        tmp.high_byte = (addr_val and &HFF00) shr 8
 
         tmp.byte_count = 2  ' always assume byte count = 2 for immediate data   
     elseif is_register = 1 then
@@ -220,6 +220,14 @@ function asm_encode_register(register_name as string) as ubyte
             return NREG_SP
         case "so"
             return NREG_SO
+        case "ss"
+            return NREG_SS
+        case "ds"
+            return NREG_DS
+        case "si"
+            return NREG_SI
+        case "di"
+            return NREG_DI
         case "ga"
             return NREG_GA
         case "gb"
@@ -295,6 +303,14 @@ function asm_decode_register(reg as ubyte) as string
             return "sp"
         case NREG_SO
             return "so"
+        case NREG_SS
+            return "ss"
+        case NREG_DS
+            return "ds"
+        case NREG_SI
+            return "si"
+        case NREG_DI
+            return "di"
         case NREG_GA
             return "ga"
         case NREG_GB
@@ -352,15 +368,15 @@ end function ' asm_decode_register()
 
 function asm_encode_opcode(instruction as string) as ubyte
     select case lcase(instruction)
-        case "copy"
+        case "copy", "copy"
             return OP_COPY
-        case "add"
+        case "add", "add"
             return OP_ADD
-        case "sub"
+        case "sub", "sub"
             return OP_SUB
-        case "mul"
+        case "mul", "mul"
             return OP_MUL
-        case "div"
+        case "div", "div"
             return OP_DIV
         case "shl"
             return OP_SHL
@@ -484,6 +500,7 @@ sub asm_assemble(instruction as string)
     dim opcode as ubyte = 0
     dim operand as t_operand
     dim ops_following as ubyte = 0
+    dim data_type as ubyte = 0
 
     dim i as integer
 
@@ -494,22 +511,23 @@ sub asm_assemble(instruction as string)
     inst = get_lexer_entry(0).strval
     opcode = asm_encode_opcode(inst)   
 
+    select case lcase(get_lexer_entry(1).strval)
+        case "byte"
+            data_type = DT_BYTE
+        case "word"
+            data_type = DT_WORD
+    end select
+
     st_write_byte cpu_state.ep, asm_offset, opcode
 
 
     operand_count = asm_operand_count(opcode)
 
-    for i = 1 to operand_count
+    for i = 2 to operand_count + 1
         
         asm_offset = asm_offset + 1
         
-        if i < operand_count then
-            ops_following = 1
-        else
-            ops_following = 0
-        end if
-
-        operand = asm_encode_address(ops_following, get_lexer_entry(i).strval)
+        operand = asm_encode_address(data_type, get_lexer_entry(i).strval)
             
 '        print "operand_count: "; operand_count; " operand: "; i; " amod: "; hex(operand.amod);
 '        print " low_byte: "; hex(operand.low_byte); " high_byte: "; hex(operand.high_byte)
@@ -575,6 +593,15 @@ function asm_disassemble(page as ushort, offset as ushort) as string
         ' get amod byte and increment the offset
         operands(i).amod = st_read_byte(page, offset)
         offset = offset + 1
+
+        if i = 1 then
+            select case asm_amod_datatype(operands(i).amod)
+                case DT_BYTE
+                    tmp_str &= "byte "
+                case DT_WORD
+                    tmp_str &= "word "
+            end select
+        end if 
 
         actual_amod = asm_amod_amod(operands(i).amod)
 

@@ -8,7 +8,6 @@
 #define ERR_INVALID_PAGE_ID 1
 #define ERR_INVALID_OFFSET 2
 
-
 ' 
 ' 51-100: scheduling
 '
@@ -16,5 +15,10 @@
 '
 ' 101-150: alu
 '
+
+'
+' 151-200: instruction decoder
+'
+#define ERR_INVALID_DATA_TYPE 151
 
 declare sub machine_error(error_code as integer, severity as integer)

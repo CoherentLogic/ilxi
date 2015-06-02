@@ -109,6 +109,10 @@ sub cli()
 	            end if
 	
 	       	    ilxi_setr get_lexer_entry(1).strval, regval
+            case "pushb"
+                cpu_push_byte get_lexer_entry(1).byteval
+            case "pushw"
+                cpu_push_word get_lexer_entry(1).intval
 	        case "getm"
 	            dim le_from as lexer_entry
 	            dim le_to as lexer_entry
