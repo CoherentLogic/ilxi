@@ -226,6 +226,12 @@ sub cpu()
 
         end select
 
+        ' WARNING  WARNING  WARNING
+        '
+        ' --- MUST NOT ALTER CP:PC AFTER THIS POINT!!!! ---
+        '
+        '
+
         if cpu_get_flag(FL_TRACE) then cpu_dump_state
 	  
         if cpu_state.pc >= (PAGESIZE - 1) then

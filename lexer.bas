@@ -59,7 +59,7 @@ function lex(input_str as string) as integer
                 if hex_number = 1 then leader = "&H"
 	            if recog_state = LC_NUM then
 	                if val(leader & b) < 256 then                    
-	                    lex_post_byte cubyte(val(leader & b))
+	                    lex_post_byte cubyte(val(leader & b))                       
 	                elseif val(leader & b) >= 256 then
 	                    lex_post_int valint(leader & b)		    
 	                end if
@@ -185,6 +185,7 @@ sub lex_post_byte(input_byte as ubyte)
     with lexer_entries(lexer_index)
     	.lexer_class = LC_BYTE
         .byteval = input_byte
+        .strval = trim(str(input_byte))
     end with
 
     if lexer_index <= LEXSIZE then
@@ -203,6 +204,7 @@ sub lex_post_int(input_int as ushort)
     with lexer_entries(lexer_index)
         .lexer_class = LC_INT
         .intval = input_int
+        .strval = trim(str(input_int))
     end with
 
     if lexer_index <= LEXSIZE then
