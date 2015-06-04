@@ -370,6 +370,8 @@ function asm_encode_opcode(instruction as string) as ubyte
     select case lcase(instruction)
         case "copy", "copy"
             return OP_COPY
+        case "cpsz"
+            return OP_CPSZ
         case "add", "add"
             return OP_ADD
         case "sub", "sub"
@@ -394,6 +396,8 @@ function asm_encode_opcode(instruction as string) as ubyte
             return OP_EQV
         case "cmp"
             return OP_CMP
+        case "cmpsz"
+            return OP_CMPSZ
         case "branch"
             return OP_BRANCH
         case "beq"
@@ -433,6 +437,8 @@ function asm_decode_opcode(opcode as ubyte) as string
     select case opcode
         case OP_COPY
             return "copy"
+        case OP_CPSZ
+            return "cpsz"
         case OP_ADD
             return "add"
         case OP_SUB
@@ -457,6 +463,8 @@ function asm_decode_opcode(opcode as ubyte) as string
             return "eqv"
         case OP_CMP
             return "cmp"
+        case OP_CMPSZ
+            return "cmpsz"
         case OP_BRANCH
             return "branch"
         case OP_BEQ
@@ -559,7 +567,7 @@ function asm_operand_count(opcode as ubyte) as ubyte
             return 2
         case OP_BEQ, OP_BNE, OP_BZ, OP_BLT, OP_BGT
             return 1
-        case OP_SRET, OP_LRET, OP_IRET, OP_NOP, OP_HLT
+        case OP_SRET, OP_LRET, OP_IRET, OP_NOP, OP_HLT, OP_CPSZ, OP_CMPSZ
             return 0
     end select
 end function ' asm_operand_count()

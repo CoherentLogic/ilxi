@@ -3,71 +3,74 @@
 ;
 ;  ILXI ROM
 ;
-ORIGIN MAIN
-PROGRAM SEGMENT CODE "ROMCODE.BIN"
-
-SYMBOL ZSTRING NAME "ILXIM ROM Monitor"
-SYMBOL WORD VID_PAGE 3
-SYMBOL WORD VID_OFFSET 0
-
-LABEL MAIN
-    ; 
-    ; main entry point
-    ;
-    push %ep
-    push %ga
-    push %gb
-    push %gc
-
-    copy %ga,{NAME}
-    copy %ep,{VID_PAGE}
-    copy %gb,{VID_OFFSET}
- 
-    scall {STRCPY}
-
-    pop %gc
-    pop %gb
-    pop %ga
-    pop %ep
-
-    hlt
-
-LABEL STRCPY
-    ;
-    ; STRCPY
-    ;  DP:GA source 
-    ;  EP:GB target
-    ;
-
-LABEL STRCPY_TOP    
-
-    ; copy the source byte to %gc
-    copy %gc,(%ga)
-
-    ; exit if null byte encountered
-    cmp %gc,0
-    beq {STRCPY_END}
-
-    ; save dp and set dp = ep
-    push %dp
-    copy %dp,%ep
-
-    ; copy %gc to the target
-    copy (%gb),%gc
+;  Copyright (C) 2015 Coherent Logic Development LLC
+; 
     
-    pop %dp
+    PROGRAM TITLE 'ROM'
+    ORIGIN 1                    ; ROM CODE BEGINS AT 0000:0001
 
-    add %ga,1
-    add %gb,1
-    branch {STRCPY_TOP}
+    EQU VID_PAGE 1              ; VIDEO BUFFER IS AT 0001:0000 - 0001:07D0
+    EQU VID_BASE 0              ; VIDEO BUFFER BASE OFFSET
 
-LABEL STRCPY_END
-    ; return
-    lret
-      
+    EQU ROM_DATA_PAGE 0         
+    EQU ROM_STACK 10            ; ROM RESERVES PAGE 10 FOR STACK OPERATIONS
+    
+LABEL __rom_start
+    ;;  
+    ;; JUMP TO ROM INITIALIZATION ROUTINE
+    ;; 
+    BRANCH WORD {__rom_init}
 
+    ;; DEFINES
+    VAR ZSTRING ROM_VS "ILXI ROM MONITOR V0.01 COPYRIGHT (C) 2015 COHERENT LOGIC DEVELOPMENT LLC"
+    VAR WORD TERM_PTR 1
+    
+LABEL __rom_init
+    ;;
+    ;; SET UP DATA AND STACK
+    ;; 
+    COPY WORD %DP,{ROM_DATA_PAGE}
+    COPY WORD %SP,{ROM_STACK}
 
+    ;;
+    ;; PRINT ROM VERSION
+    ;;
+    COPY WORD %SS,%DP
+    COPY WORD %SI,{ROM_VS}
 
+    SCALL WORD {__term_print_string}
 
+    ;; 
+    ;; HALT
+    ;; 
+    HLT
+
+    ;; __term_print_string
+    ;; 
+    ;; PRINTS STRING AT SS:SI
+LABEL __term_print_string
+    ;;
+    ;; PRESERVE REGISTERS
+    ;; 
+    PUSH WORD %SS
+    PUSH WORD %DS
+    PUSH WORD %DI
+    
+    COPY WORD %DS,{VID_PAGE}   
+    COPY WORD %DI,#{TERM_PTR}
+
+    CPSZ
+
+    ADD WORD (#{TERM_PTR}),%DI
+    
+    ;;
+    ;; RESTORE REGISTERS AND RETURN
+    ;;
+    POP WORD %DI
+    POP WORD %DS
+    POP WORD %SS
+
+    SRET
 
     
+

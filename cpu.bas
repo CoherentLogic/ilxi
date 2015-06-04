@@ -7,11 +7,12 @@
 #include "asm.bi"
 #include "util.bi"
 #include "inst.bi"
+#include "console.bi"
 
 sub init_cpu()
             
 	with cpu_state
-		.pc = 0 
+		.pc = 1
 		
 		.ec = 0
 		.es = 0
@@ -21,7 +22,7 @@ sub init_cpu()
 		.dp = 0
         .ep = 0
 		.sp = 0
-		.so = PAGESIZE - 1
+		.so = PAGESIZE - 2
 
         .ss = 0
         .ds = 0
@@ -46,10 +47,15 @@ sub init_cpu()
 		.go = 0
 		.gp = 0
 	end with   
-	
+
+    cpu_set_flag FL_INTERRUPT	
+
+    st_load_page "rom.bin", 0
+
 end sub
 
 sub cpu()
+    dim clock_count as long = 0
 
     dim opcode as ubyte
     dim inst_pc as ushort
@@ -62,9 +68,17 @@ sub cpu()
     dim data_type as ubyte
 
     cpu_clear_flag FL_HALT
+    cls
 
     ' main cpu loop
     do	  
+        clock_count += 1
+        
+        if clock_count = 100 then
+            console_refresh
+            clock_count = 0
+        end if
+
         inst_pc = cpu_state.pc
 
         if cpu_get_flag(FL_DEBUG) then
@@ -166,6 +180,8 @@ sub cpu()
         select case opcode
             case OP_COPY		 		 
                 inst_copy operands(1), operands(2) 
+            case OP_CPSZ
+                inst_cpsz          
             case OP_ADD
                 inst_add operands(1), operands(2)
             case OP_SUB
@@ -190,6 +206,8 @@ sub cpu()
                 inst_eqv operands(1), operands(2)
             case OP_CMP
                 inst_cmp operands(1), operands(2)
+            case OP_CMPSZ
+                inst_cmpsz
             case OP_BRANCH
                 inst_branch operands(1)
             case OP_BEQ
@@ -241,11 +259,16 @@ sub cpu()
         end if
 
         if cpu_get_flag(FL_HALT) then
+
+            console_refresh
+
             if cpu_state.es > 0 then
+                print ""
                 print "cpu(): trap "; trim(str(cpu_state.ec)); " at pc = "; trim(str(cpu_state.pc))
             else
+                print ""
                 print "cpu(): halt at "; ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":"; ilxi_pad_left(hex(inst_pc), "0", 4)
-            end if
+            end if        
 	     
             exit do
         end if
@@ -254,7 +277,6 @@ sub cpu()
         
     loop
 
-    
 end sub ' cpu()
 
 function cpu_fetch() as ubyte

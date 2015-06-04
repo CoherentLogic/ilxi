@@ -57,6 +57,7 @@
 #define OP_DATA	  000
 
 #define OP_COPY   001
+#define OP_CPSZ   002
 #define OP_ADD    003
 #define OP_SUB    004
 #define OP_MUL	  005
@@ -69,6 +70,7 @@
 #define OP_XOR    012
 #define OP_EQV    013
 #define OP_CMP    014
+#define OP_CMPSZ  015
 
 #define OP_BRANCH 020
 #define OP_BEQ	  021

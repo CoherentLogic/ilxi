@@ -5,6 +5,7 @@
 #include once "asm.bi"
 
 declare sub inst_copy(dest as t_operand, source as t_operand)
+declare sub inst_cpsz()
 declare sub inst_add(dest as t_operand, source as t_operand)
 declare sub inst_sub(dest as t_operand, source as t_operand)
 declare sub inst_mul(dest as t_operand, source as t_operand)
@@ -17,6 +18,7 @@ declare sub inst_and(dest as t_operand, source as t_operand)
 declare sub inst_xor(dest as t_operand, source as t_operand)
 declare sub inst_eqv(dest as t_operand, source as t_operand)
 declare sub inst_cmp(dest as t_operand, source as t_operand)
+declare sub inst_cmpsz()
 declare sub inst_branch(dest as t_operand)
 declare sub inst_beq(dest as t_operand)
 declare sub inst_bne(dest as t_operand)

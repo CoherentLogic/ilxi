@@ -13,7 +13,6 @@ function inst_getbyte(op as t_operand, page as integer) as ubyte
 
     if op.register = 1 then
         if op.indirect = 0 then                'register direct
-
             select case op.low_byte
                 case NREG_LA, NREG_LB, NREG_LC, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
                     return cubyte(cpu_get_reg(op.low_byte))
@@ -154,6 +153,26 @@ sub inst_copy(dest as t_operand, source as t_operand)
     end select
 
 end sub ' inst_copy()
+
+sub inst_cpsz()
+    ' copy ZSTRING from SS:SI to DS:DI
+
+    dim sb as ubyte
+    
+    do
+        sb = st_read_byte(cpu_state.ss, cpu_state.si)
+        
+        if sb <> 0 then 
+            st_write_byte cpu_state.ds, cpu_state.di, sb       
+            cpu_state.si += 1
+            cpu_state.di += 1
+        else
+            exit sub
+        end if
+
+    loop 
+
+end sub ' inst_cpsz()
 
 sub inst_add(dest as t_operand, source as t_operand)
 
@@ -307,6 +326,10 @@ sub inst_cmp(dest as t_operand, source as t_operand)
     if d > s then cpu_set_flag FL_GREATERTHAN
 
 end sub ' inst_cmp()
+
+sub inst_cmpsz()
+
+end sub ' inst_cmpsz()
 
 sub inst_branch(dest as t_operand)
     select case dest.data_type

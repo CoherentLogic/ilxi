@@ -8,11 +8,15 @@
 #include "storage.bi"
 #include "asm.bi"
 #include "util.bi"
+#include "console.bi"
 
 startup
 
 sub startup()
-    color 7,0
+
+    color 12,0: color 7,0       ' hack to get around weird terminal bug around 7 being the default
+    cls
+
     print "ILXIM Virtual Machine"
     print " Copyright (C) 2015 Coherent Logic Development LLC"
     print ""
@@ -39,6 +43,8 @@ sub cli()
 	    cmd_name = get_lexer_entry(0).strval
 	
 	    select case cmd_name
+            case "redraw"
+                cls: console_refresh
             case "loadpage", "lp"
                 dim img_file as string = get_lexer_entry(1).strval
                 dim page_index as integer

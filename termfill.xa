@@ -1,0 +1,30 @@
+;
+; termfill.xa
+; 
+;  Test program to fill screen with letters
+;
+    PROGRAM TITLE 'TERMFILL'
+    ORIGIN 256
+
+    EQU OUT_CHAR 65             ; the letter 'A'
+    EQU VID_PAGE 1              ; video segment
+    EQU VID_BASE 0              ; video offset
+    EQU CHAR_COUNT 2000         ; characters to be output
+
+LABEL MAIN
+
+    COPY WORD %DS,{VID_PAGE}    ; set dest. segment to video segment
+    COPY BYTE %LA,{OUT_CHAR}    ; put OUT_CHAR in low byte of %GA
+    COPY WORD %GC,{VID_BASE}    ; initialize counter
+
+LABEL NEXT
+    
+    COPY BYTE (%GC),%LA         ; copy character to next slot in memory
+    CMP WORD %GC,{CHAR_COUNT}   ; see if we have already reached the maximum char count
+    BEQ WORD {MAIN_tail}        ; if we do, jump out of the loop
+    ADD WORD %GC,1              ; else, increment counter
+    BRANCH WORD {NEXT}          ; and do it again
+
+LABEL MAIN_tail
+    
+    HLT
