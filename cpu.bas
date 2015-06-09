@@ -59,8 +59,6 @@ end sub
 
 sub cpu()
 
-    bus_start
-
     dim clock_count as long = 0
 
     dim opcode as ubyte
@@ -76,14 +74,10 @@ sub cpu()
     cpu_clear_flag FL_HALT
     cls
 
+    bus_start
+
     ' main cpu loop
     do	  
-        clock_count += 1
-        
-        if clock_count = 100 then
-            console_refresh
-            clock_count = 0
-        end if
 
         inst_pc = cpu_state.pc
 
@@ -265,8 +259,6 @@ sub cpu()
         end if
 
         if cpu_get_flag(FL_HALT) then
-
-            console_refresh
 
             if cpu_state.es > 0 then
                 print ""

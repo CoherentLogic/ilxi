@@ -46,7 +46,7 @@ sub bus_start()
     for i = 1 to dev_count
         print "bus_start():  starting device "; devices(i)
 
-        bus(devices(i)).dev_thread = threadcreate(@bus(devices(i)).dev_cycle)
+        bus(devices(i)).dev_thread = threadcreate(bus(devices(i)).dev_cycle, @devices(i))
         bus(devices(i)).dev_thread_started = 1
     next i
 
@@ -71,6 +71,13 @@ sub bus_stop()
 
 end sub
 
+sub bus_sig_stop(device_number as ushort)
+    bus(device_number).dev_thread_stop_flag = 1
+end sub
+
+function bus_get_stop_flag(device_number as ushort) as ubyte
+    return bus(device_number).dev_thread_stop_flag
+end function
 
 sub bus_attach(device_number as ushort, dev as dev_entry)
     dim port as ushort

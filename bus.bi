@@ -14,7 +14,7 @@ type dev_entry
 
     dev_init as sub()
     dev_reset as sub()
-    dev_cycle as sub()
+    dev_cycle as sub(byval userdata as any ptr)
 
     dev_input as function(port_number as ushort) as ushort
     dev_output as sub(port_number as ushort, value as ushort) 
@@ -35,6 +35,8 @@ declare sub bus_clear()
 declare sub bus_init()
 declare sub bus_start()
 declare sub bus_stop()
+declare sub bus_sig_stop(device_number as ushort)
+declare function bus_get_stop_flag(device_number as ushort) as ubyte
 
 declare sub bus_attach(device_number as ushort, dev as dev_entry)
 declare sub bus_output(port_number as ushort, value as ushort)

@@ -47,8 +47,6 @@ sub cli()
 	    cmd_name = get_lexer_entry(0).strval
 	
 	    select case cmd_name
-            case "redraw"
-                cls: console_refresh
             case "loadpage", "lp"
                 dim img_file as string = get_lexer_entry(1).strval
                 dim page_index as integer
