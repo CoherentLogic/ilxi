@@ -8,6 +8,7 @@
 #include "util.bi"
 #include "inst.bi"
 #include "console.bi"
+#include "bus.bi"
 
 sub init_cpu()
             
@@ -52,9 +53,14 @@ sub init_cpu()
 
     st_load_page "rom.bin", 0
 
+    bus_init
+
 end sub
 
 sub cpu()
+
+    bus_start
+
     dim clock_count as long = 0
 
     dim opcode as ubyte
@@ -276,6 +282,8 @@ sub cpu()
         if cpu_get_flag(FL_DEBUG) then exit do
         
     loop
+
+    bus_stop
 
 end sub ' cpu()
 

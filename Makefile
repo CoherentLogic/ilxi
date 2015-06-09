@@ -1,11 +1,16 @@
-VM_OBJS = ilxi.o alu.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o console.o
-XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o
-FBCFLAGS = -g 
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o
+XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o
+FBCFLAGS = -g -mt 
 #-d LEXDEBUG
 
-all: vm assembler
+all: vm assembler rom
 
 vm: ilxi
+
+rom: rom.bin xiasm
+
+rom.bin: rom.xa
+	./xiasm rom.xa
 
 assembler: xiasm  
 
@@ -18,11 +23,11 @@ xiasm.o: xiasm.bas
 ilxi: $(VM_OBJS)
 	fbc $(FBCFLAGS) -x ilxi $(VM_OBJS)
 
-alu.o: alu.bas 
-	fbc $(FBCFLAGS) -o alu.o -c alu.bas
-
 asm.o: asm.bas
 	fbc $(FBCFLAGS) -o asm.o -c asm.bas
+
+bus.o: bus.bas
+	fbc $(FBCFLAGS) -o bus.o -c bus.bas
 
 console.o: console.bas
 	fbc $(FBCFLAGS) -o console.o -c console.bas
@@ -52,4 +57,4 @@ util.o: util.bas
 	fbc $(FBCFLAGS) -o util.o -c util.bas
 
 clean:
-	rm -f *.o ilxi xiasm
+	rm -f *.o ilxi xiasm rom.bin

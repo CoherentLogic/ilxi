@@ -1,7 +1,7 @@
 ; 
 ; rom.xa
 ;
-;  ILXI ROM
+;  ILXIM ROM
 ;
 ;  Copyright (C) 2015 Coherent Logic Development LLC
 ; 
@@ -22,7 +22,7 @@ LABEL __rom_start
     BRANCH WORD {__rom_init}
 
     ;; DEFINES
-    VAR ZSTRING ROM_VS "ILXI ROM MONITOR V0.01 COPYRIGHT (C) 2015 COHERENT LOGIC DEVELOPMENT LLC"
+    VAR ZSTRING ROM_VS "ILXIM ROM MONITOR V0.01 COPYRIGHT (C) 2015 COHERENT LOGIC DEVELOPMENT LLC"
     VAR WORD TERM_PTR 1
     
 LABEL __rom_init
@@ -39,7 +39,7 @@ LABEL __rom_init
     COPY WORD %SI,{ROM_VS}
 
     SCALL WORD {__term_print_string}
-
+    
     ;; 
     ;; HALT
     ;; 

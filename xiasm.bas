@@ -69,6 +69,8 @@ sub do_asm(filename as string, argi as integer)
 
     st_save_page output_file_name, argi
 
+    print ">>> FILE OUTPUT [INFO]:  Produced "; output_file_name; " from "; filename
+
 end sub
 
 function read_source_file(filename as string) as integer

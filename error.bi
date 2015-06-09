@@ -13,8 +13,9 @@
 '
 
 '
-' 101-150: alu
+' 101-150: i/o
 '
+#define ERR_INVALID_IOPORT 101
 
 '
 ' 151-200: instruction decoder

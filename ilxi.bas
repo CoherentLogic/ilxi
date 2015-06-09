@@ -9,6 +9,7 @@
 #include "asm.bi"
 #include "util.bi"
 #include "console.bi"
+#include "bus.bi"
 
 startup
 
@@ -20,6 +21,9 @@ sub startup()
     print "ILXIM Virtual Machine"
     print " Copyright (C) 2015 Coherent Logic Development LLC"
     print ""
+
+    bus_clear
+    console_attach
 
     init_cpu    
     cli
