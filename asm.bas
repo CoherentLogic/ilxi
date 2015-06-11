@@ -426,6 +426,10 @@ function asm_encode_opcode(instruction as string) as ubyte
             return OP_PUSH
         case "pop"
             return OP_POP
+        case "in"
+            return OP_IN
+        case "out"
+            return OP_OUT        
         case "nop"
             return OP_NOP
         case "hlt"
@@ -493,6 +497,10 @@ function asm_decode_opcode(opcode as ubyte) as string
             return "push"
         case OP_POP
             return "pop"
+        case OP_IN
+            return "in"
+        case OP_OUT
+            return "out"
         case OP_NOP
             return "nop"
         case OP_HLT
@@ -563,7 +571,7 @@ function asm_operand_count(opcode as ubyte) as ubyte
             return 2
         case OP_BRANCH, OP_SCALL, OP_ICALL, OP_PUSH, OP_POP
             return 1
-        case OP_LCALL
+        case OP_LCALL, OP_IN, OP_OUT
             return 2
         case OP_BEQ, OP_BNE, OP_BZ, OP_BLT, OP_BGT
             return 1

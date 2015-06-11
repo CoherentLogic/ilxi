@@ -9,6 +9,7 @@
 #include "inst.bi"
 #include "console.bi"
 #include "bus.bi"
+#include "signal.bi"
 
 sub init_cpu()
             
@@ -54,8 +55,18 @@ sub init_cpu()
     st_load_page "rom.bin", 0
 
     bus_init
+    signal_init
 
 end sub
+
+function cpu_get_cppc() as string
+
+    dim tmp as string
+
+    tmp = ilxi_pad_left(hex(cpu_state.cp), "0", 4) & ":"
+    tmp &= ilxi_pad_left(hex(cpu_state.pc), "0", 4)
+
+end function
 
 sub cpu()
 
@@ -236,6 +247,10 @@ sub cpu()
                 inst_push operands(1)
             case OP_POP
                 inst_pop operands(1)
+            case OP_IN
+                inst_in operands(1), operands(2)
+            case OP_OUT
+                inst_out operands(1), operands(2)
             case OP_NOP
                 ' do nothing
             case OP_HLT

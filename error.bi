@@ -9,8 +9,9 @@
 #define ERR_INVALID_OFFSET 2
 
 ' 
-' 51-100: scheduling
+' 51-100: arithmetic
 '
+#define ERR_DIVZERO 51
 
 '
 ' 101-150: i/o

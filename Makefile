@@ -1,5 +1,5 @@
-VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o
-XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o
+XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o
 FBCFLAGS = -g -mt 
 #-d LEXDEBUG
 
@@ -25,6 +25,9 @@ ilxi: $(VM_OBJS)
 
 asm.o: asm.bas
 	fbc $(FBCFLAGS) -o asm.o -c asm.bas
+
+signal.o: signal.bas
+	fbc $(FBCFLAGS) -o signal.o -c signal.bas
 
 bus.o: bus.bas
 	fbc $(FBCFLAGS) -o bus.o -c bus.bas

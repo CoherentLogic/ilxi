@@ -89,6 +89,9 @@
 #define OP_PUSH	  033
 #define	OP_POP	  034
 
+#define OP_IN     040
+#define OP_OUT    041
+
 #define OP_NOP	  254
 #define OP_HLT	  255
 
@@ -315,6 +318,7 @@ end type
 common shared cpu_state as t_cpu_state
 
 declare sub init_cpu()
+declare function cpu_get_cppc() as string
 declare sub cpu()
 declare sub cpu_dump_state()
 declare sub cpu_set_flag(flag as ushort)
