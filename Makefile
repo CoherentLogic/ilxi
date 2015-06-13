@@ -1,16 +1,22 @@
-VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o
-XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o
+XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o
 FBCFLAGS = -g -mt 
-#-d LEXDEBUG
+# -d STACKDEBUG
+# -d LEXDEBUG
 
-all: vm assembler rom
+all: vm assembler rom test
 
-vm: ilxi
+vm: ilxim
+
+test: t_stack.bin
 
 rom: rom.bin xiasm
 
 rom.bin: rom.xa
 	./xiasm rom.xa
+
+t_stack.bin: t_stack.xa
+	./xiasm t_stack.xa
 
 assembler: xiasm  
 
@@ -20,8 +26,8 @@ xiasm: $(XIASM_OBJS)
 xiasm.o: xiasm.bas
 	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
 
-ilxi: $(VM_OBJS)
-	fbc $(FBCFLAGS) -x ilxi $(VM_OBJS)
+ilxim: $(VM_OBJS)
+	fbc $(FBCFLAGS) -x ilxim $(VM_OBJS)
 
 asm.o: asm.bas
 	fbc $(FBCFLAGS) -o asm.o -c asm.bas
@@ -59,5 +65,8 @@ ilxi.o: ilxi.bas
 util.o: util.bas
 	fbc $(FBCFLAGS) -o util.o -c util.bas
 
+message.o: message.bas
+	fbc $(FBCFLAGS) -o message.o -c message.bas
+
 clean:
-	rm -f *.o ilxi xiasm rom.bin
+	rm -f *.o ilxim xiasm rom.bin

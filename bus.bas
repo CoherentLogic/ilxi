@@ -8,6 +8,8 @@
 #include "cpu.bi"
 #include "storage.bi"
 #include "error.bi"
+#include "message.bi"
+#include "console.bi"
 
 sub bus_clear()
 
@@ -30,7 +32,7 @@ sub bus_init()
     dim i as integer
 
     for i = 1 to dev_count
-        print "bus_init():  initializing device "; devices(i)
+        message_print "bus_init():  initializing device " & devices(i)
 
         bus(devices(i)).dev_thread_started = 0
         bus(devices(i)).dev_thread_stop_flag = 0
@@ -44,7 +46,7 @@ sub bus_start()
     dim i as integer
 
     for i = 1 to dev_count
-        print "bus_start():  starting device "; devices(i)
+        message_print "bus_start():  starting device " & devices(i)
 
         bus(devices(i)).dev_thread = threadcreate(bus(devices(i)).dev_cycle, @devices(i))
         bus(devices(i)).dev_thread_started = 1
@@ -60,7 +62,7 @@ sub bus_stop()
         if bus(devices(i)).dev_thread_started = 1 then
             bus(devices(i)).dev_thread_stop_flag = 1
 
-            print "bus_stop():  stopping device "; devices(i)           
+            message_print "bus_stop():  stopping device " & devices(i)           
 
             threadwait bus(devices(i)).dev_thread
             bus(devices(i)).dev_thread_started = 0
@@ -88,15 +90,20 @@ sub bus_attach(device_number as ushort, dev as dev_entry)
     for port = dev.io_base to dev.io_base + (dev.io_port_count - 1)
 
         if io_ports(port) >= 0 then
+
+            mutexlock console_mutex
+
             print "bus_attach():  port "; port; 
             print " requested by device "; device_number; 
             print " already bound to device "; io_ports(port)
            
             print "bus_attach():  failed for device "; device_number
+
+            mutexunlock console_mutex
             
             exit sub
         else
-            print "bus_attach():  allocating port "; port; " to device "; device_number
+            message_print "bus_attach():  allocating port " & port & " to device " & device_number
             io_ports(port) = device_number
         end if
 

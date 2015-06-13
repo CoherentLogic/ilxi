@@ -4,7 +4,7 @@
 type st_page
      task_id as ubyte
      label as string * 255
-     contents(PAGESIZE) as ubyte
+     contents(0 to PAGESIZE - 1) as ubyte
 end type
 
 declare function st_read_byte(page as integer, offset as integer) as byte

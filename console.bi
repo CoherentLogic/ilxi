@@ -5,6 +5,8 @@
 #define CONSOLE_WIDTH 80
 #define CONSOLE_HEIGHT 25
 
+common shared console_mutex as any ptr
+
 declare sub console_attach()
 declare sub console_init()
 declare sub console_reset()

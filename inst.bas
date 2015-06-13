@@ -101,6 +101,8 @@ end sub ' inst_setbyte()
 
 sub inst_setword(op as t_operand, page as integer, value as ushort)
 
+    print "inst_setword():  "; value
+
     if op.register = 1 then
         if op.indirect = 0 then                'register direct
 
@@ -731,9 +733,9 @@ sub inst_push(dest as t_operand)
 
     select case dest.data_type
         case DT_BYTE
-            cpu_push_byte inst_getbyte(dest, cpu_state.ds)
+            cpu_push_byte inst_getbyte(dest, cpu_state.dp)
         case DT_WORD
-            cpu_push_word inst_getword(dest, cpu_state.ds)
+            cpu_push_word inst_getword(dest, cpu_state.dp)
     end select
 
 end sub ' inst_push()
@@ -748,9 +750,9 @@ sub inst_pop(dest as t_operand)
     
     select case dest.data_type
         case DT_BYTE
-            inst_setbyte dest, cpu_state.ds, cpu_pop_byte()
+            inst_setbyte dest, cpu_state.dp, cpu_pop_byte()
         case DT_WORD
-            inst_setword dest, cpu_state.ds, cpu_pop_word()
+            inst_setword dest, cpu_state.dp, cpu_pop_word()
     end select 
 
 end sub ' inst_pop()

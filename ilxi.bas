@@ -10,6 +10,7 @@
 #include "util.bi"
 #include "console.bi"
 #include "bus.bi"
+#include "message.bi"
 
 startup
 
@@ -17,10 +18,13 @@ sub startup()
 
     color 12,0: color 7,0       ' hack to get around weird terminal bug around 7 being the default
     cls
+    
+    message_init
+    
 
-    print "ILXIM Virtual Machine"
-    print " Copyright (C) 2015 Coherent Logic Development LLC"
-    print ""
+    message_print "ILXIM Virtual Machine"
+    message_print " Copyright (C) 2015 Coherent Logic Development LLC"
+    message_print ""
 
     bus_clear
     console_attach
@@ -33,6 +37,7 @@ end sub
 
 sub cli()
 
+    dim last_cmd as string
     dim cli_cmd as string
     dim cmd_name as string
     dim trace as integer 
@@ -41,8 +46,16 @@ sub cli()
     trace = 0
 
     do
+        last_cmd = cli_cmd
+
+        mutexlock console_mutex
 	    line input "ilxim> ", cli_cmd	
-	
+        mutexunlock console_mutex
+        
+        if cli_cmd = "" then cli_cmd = last_cmd
+       
+        
+
 	    arg_count = lex(cli_cmd)
 	    cmd_name = get_lexer_entry(0).strval
 	
@@ -82,27 +95,29 @@ sub cli()
                 end if
 
                 asm_assemble_interactive origin_addr
-            case "disassemble"
+            case "disassemble", "di"
                 dim page_addr as ushort              
-                dim offset_addr as ushort
+                dim start_offset_addr as ushort
+                dim da_count as ushort
+
+                page_addr = cpu_state.cp
 
                 if get_lexer_entry(1).lexer_class = LC_BYTE then
-                    page_addr = get_lexer_entry(1).byteval
+                    start_offset_addr = get_lexer_entry(1).byteval
                 else
-                    page_addr = get_lexer_entry(1).intval
+                    start_offset_addr = get_lexer_entry(1).intval
                 end if
 
                 if get_lexer_entry(2).lexer_class = LC_BYTE then
-                    offset_addr = get_lexer_entry(2).byteval
+                    da_count = get_lexer_entry(2).byteval
                 else
-                    offset_addr = get_lexer_entry(2).intval
-                end if
-            
-                print ilxi_pad_left(hex(page_addr), "0", 4); ":";
-                print ilxi_pad_left(hex(offset_addr), "0", 4); "  ";
+                    da_count = get_lexer_entry(2).intval
+                endif
 
-                print asm_disassemble(page_addr, offset_addr)
+                asm_disassemble_range page_addr, start_offset_addr, da_count
+
             case "step"
+                cpu_clear_flag FL_DEBUG
                 cpu_set_flag FL_DEBUG
                 cpu
 	        case "getr"
@@ -146,6 +161,8 @@ sub cli()
 		   
 	            dim i as integer
 	            dim k as integer
+
+                mutexlock console_mutex
 	
 	            for i = m_from to m_to step 8
 	                print
@@ -166,6 +183,9 @@ sub cli()
 		    
 	            print
 	            print
+
+                mutexunlock console_mutex
+
 	        case "setm"
 	       	    dim le_setm_addr as lexer_entry
 	            dim le_setm_value as lexer_entry
@@ -201,15 +221,17 @@ sub cli()
 	       	    cpu
 	        case "reset"
 	            init_cpu	            
+            case "exit"
+                end
 	        case else
-	       	    shell cli_cmd
+	       	    message_print "cli():  invalid command '" & cmd_name & "'"
 	    end select
 	
     loop until cli_cmd = "exit"
 end sub
 
-sub ilxi_getr(register as string)
-    print ucase(register); ": "; trim(str(cpu_get_reg_alpha(lcase(register))))
+sub ilxi_getr(register as string)   
+    message_print ucase(register) & ": " & trim(str(cpu_get_reg_alpha(lcase(register))))
 end sub
 
 sub ilxi_setr(register as string, value as integer)

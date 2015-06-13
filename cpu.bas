@@ -10,11 +10,12 @@
 #include "console.bi"
 #include "bus.bi"
 #include "signal.bi"
+#include "message.bi"
 
 sub init_cpu()
             
 	with cpu_state
-		.pc = 1
+		.pc = 0
 		
 		.ec = 0
 		.es = 0
@@ -24,7 +25,7 @@ sub init_cpu()
 		.dp = 0
         .ep = 0
 		.sp = 0
-		.so = PAGESIZE - 2
+		.so = PAGESIZE - 1
 
         .ss = 0
         .ds = 0
@@ -66,6 +67,8 @@ function cpu_get_cppc() as string
     tmp = ilxi_pad_left(hex(cpu_state.cp), "0", 4) & ":"
     tmp &= ilxi_pad_left(hex(cpu_state.pc), "0", 4)
 
+    return tmp
+
 end function
 
 sub cpu()
@@ -91,14 +94,6 @@ sub cpu()
     do	  
 
         inst_pc = cpu_state.pc
-
-        if cpu_get_flag(FL_DEBUG) then
-            print ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":";
-            print ilxi_pad_left(hex(inst_pc), "0", 4); " ";
-
-            print asm_disassemble(cpu_state.cp, inst_pc)
-        end if
-
         opcode = cpu_fetch()
 
         op_count = asm_operand_count(opcode)                        
@@ -273,24 +268,22 @@ sub cpu()
             cpu_state.es = 0
         end if
 
-        if cpu_get_flag(FL_HALT) then
-
-            if cpu_state.es > 0 then
-                print ""
-                print "cpu(): trap "; trim(str(cpu_state.ec)); " at pc = "; trim(str(cpu_state.pc))
-            else
-                print ""
-                print "cpu(): halt at "; ilxi_pad_left(hex(cpu_state.cp), "0", 4); ":"; ilxi_pad_left(hex(inst_pc), "0", 4)
-            end if        
-	     
-            exit do
-        end if
-
-        if cpu_get_flag(FL_DEBUG) then exit do
-        
+        if cpu_get_flag(FL_HALT) then exit do
+        if cpu_get_flag(FL_DEBUG) then exit do        
     loop
 
     bus_stop
+
+
+    if cpu_get_flag(FL_DEBUG) = 0 then
+	    if cpu_state.es > 0 then
+	        message_print "cpu(): trap at " & cpu_get_cppc()
+	    else
+	        message_print "cpu(): halt at " & cpu_get_cppc()
+	    end if           
+    else
+        message_print cpu_get_cppc() & "  " & asm_disassemble(cpu_state.cp, cpu_state.pc)
+    end if
 
 end sub ' cpu()
 
@@ -303,13 +296,13 @@ function cpu_fetch() as ubyte
     return t_byte
 end function ' cpu_fetch()
 
-function cpu_get_effective_address(operand as t_operand) as ushort
-
-end function ' cpu_get_effective_address()
-
 sub cpu_push_byte(byteval as ubyte)
     st_write_byte cpu_state.sp, cpu_state.so, byteval
     
+#ifdef STACKDEBUG
+    message_print "cpu_push_byte():  " & hex(byteval)
+#endif
+
     cpu_state.so -= 1
 end sub ' cpu_push_byte()
 
@@ -319,24 +312,42 @@ function cpu_pop_byte() as ubyte
     retval = st_read_byte(cpu_state.sp, cpu_state.so)
     cpu_state.so += 1
 
+#ifdef STACKDEBUG
+    message_print "cpu_pop_byte():  " & hex(retval)
+#endif
+
     return retval
 end function ' cpu_pop_byte()
 
 sub cpu_push_word(wordval as ushort)
     st_write_word cpu_state.sp, cpu_state.so - 1, wordval
-    cpu_state.so -= 2
+
+#ifdef STACKDEBUG
+    locate 30,1
+    message_print "cpu_push_word():  " & hex(wordval)
+#endif
+
+    cpu_state.so -= 1
 end sub ' cpu_push_word()
 
 function cpu_pop_word() as ushort
     dim retval as ushort
 
     retval = st_read_word(cpu_state.sp, cpu_state.so)
+
+#ifdef STACKDEBUG
+    locate 30,1
+    message_print "cpu_pop_word():  " & hex(retval)
+#endif
+
     cpu_state.so += 2
 end function ' cpu_pop_word()
 
 sub cpu_dump_state()
     dim x as t_cpu_state
     x = cpu_state
+
+    mutexlock console_mutex
 
     print ""
     print ""
@@ -358,6 +369,8 @@ sub cpu_dump_state()
     print " LF="; cpu_get_flag(FL_LESSTHAN); " GF="; cpu_get_flag(FL_GREATERTHAN); " ZF="; cpu_get_flag(FL_ZERO);
     print " PL="; cpu_get_pl(); " PF="; cpu_get_flag(FL_PARITY); " SF="; cpu_get_flag(FL_SIGN); " DF="; cpu_get_flag(FL_DEBUG);
     print ""
+
+    mutexunlock console_mutex
 
 end sub ' cpu_dump_state()
 

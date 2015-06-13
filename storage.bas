@@ -2,7 +2,7 @@
 #include "error.bi"
 #include "ilxi.bi"
 
-dim shared mem(PAGECOUNT) as st_page
+dim shared mem(0 to PAGECOUNT) as st_page
 
 function st_read_byte(page as integer, offset as integer) as byte
 	if (page > (PAGECOUNT - 1)) or (page < 0) then

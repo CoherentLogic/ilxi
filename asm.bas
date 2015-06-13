@@ -9,7 +9,7 @@
 #include "lexer.bi"
 #include "storage.bi"
 #include "util.bi"
-
+#include "console.bi"
 
 
 function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
@@ -368,17 +368,17 @@ end function ' asm_decode_register()
 
 function asm_encode_opcode(instruction as string) as ubyte
     select case lcase(instruction)
-        case "copy", "copy"
+        case "copy"
             return OP_COPY
         case "cpsz"
             return OP_CPSZ
-        case "add", "add"
+        case "add"
             return OP_ADD
-        case "sub", "sub"
+        case "sub"
             return OP_SUB
-        case "mul", "mul"
+        case "mul"
             return OP_MUL
-        case "div", "div"
+        case "div"
             return OP_DIV
         case "shl"
             return OP_SHL
@@ -692,8 +692,35 @@ function asm_disassemble(page as ushort, offset as ushort) as string
 
     next i
 
+    dasm_offset = offset
+
     return tmp_str
 end function ' asm_disassemble()
+
+
+sub asm_disassemble_range(page as ushort, start_offset as ushort, count as ushort)
+
+    dim i as integer = 0
+
+    dasm_offset = start_offset
+
+    mutexlock console_mutex
+
+    do
+        i += 1
+
+        print ilxi_pad_left(hex(page), "0", 4); ":";
+        print ilxi_pad_left(hex(dasm_offset), "0", 4); "  ";
+        print asm_disassemble(page, dasm_offset)
+
+        dasm_offset += 1
+
+        if i = count then exit do        
+    loop
+
+    mutexunlock console_mutex
+
+end sub ' asm_disassemble_range()
 
 function asm_bytes_to_ushort(lsb as ubyte, msb as ubyte) as ushort
     return (msb shl 8) or lsb

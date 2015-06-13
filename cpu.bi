@@ -16,7 +16,7 @@
 '     +--------+----------+--------+
 '
 ' OPCODE    (instruction opcode) 0-255
-' O         (operands following)   0 = no operands following; 1 = 1 operand following
+' O         (data type)   0 = byte; 1 = word
 ' MOD       (addressing mode)  
 '           0   0000 = immediate
 '           1   0001 = register direct
@@ -42,13 +42,6 @@
 '        the operand will be one byte. If the addressing mode is a memory address,
 '        the operand will be two bytes.
 '
-' The end of an instruction is indicated by a zero in the most significant bit of
-' the AMOD byte of a given operand.
-' 
-' Example:
-'
-' STORE GA, [CP]+2
-
 
 ' 
 ' opcodes

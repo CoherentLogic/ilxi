@@ -1,0 +1,88 @@
+; 
+; t_stack.xa
+;
+;  ILXIM Stack Unit Test
+;
+;  Copyright (C) 2015 Coherent Logic Development LLC
+; 
+    
+    PROGRAM TITLE 'T_STACK'
+    ORIGIN 0
+
+    EQU VID_PAGE 1
+    EQU VID_BASE 0
+
+    EQU STACK_PAGE 2
+    
+LABEL __t_stack_defines
+    
+    ;;
+    ;; SKIP DATA
+    ;;
+    BRANCH WORD {__start}
+
+    ;;
+    ;; DEFINES
+    ;;
+    VAR ZSTRING FAILMSG_W "STACK TEST FAILURE (WORD)"
+    VAR ZSTRING FAILMSG_B "STACK TEST FAILURE (BYTE)"
+    VAR ZSTRING SUCCESSMSG_W "STACK TEST SUCCESS (WORD)"
+    VAR ZSTRING SUCCESSMSG_B "STACK TEST SUCCESS (BYTE)"
+    
+LABEL __start
+    ;
+    ; SET UP THE STACK
+    ; 
+    COPY WORD %DP,0
+    COPY WORD %SP,{STACK_PAGE}
+
+    ; 
+    ; SET UP DESTINATION SEGMENT FOR VIDEO OUTPUT
+    ;
+    COPY WORD %DS,{VID_PAGE}
+   
+LABEL __test_byte
+    COPY BYTE %LA,0DEh
+    PUSH BYTE %LA
+    POP BYTE %LB
+    CMP BYTE %LB,0DEh
+    BNE WORD {__byte_fail}
+
+    ; BYTE TEST SUCCEEDED
+    COPY WORD %SI,{SUCCESSMSG_B}
+    COPY WORD %DI,0
+    CPSZ
+
+    BRANCH WORD {__test_word}
+
+LABEL __byte_fail
+    
+    ; BYTE TEST FAILED
+    COPY WORD %SI,{FAILMSG_B}
+    COPY WORD %DI,81
+    CPSZ
+
+LABEL __test_word        
+    COPY WORD %GA,0DEADh
+    PUSH WORD %GA
+    POP WORD %GB
+    CMP WORD %GB,0DEADh
+    BNE WORD {__word_fail}
+
+    ; WORD TEST SUCCEEDED
+    COPY WORD %SI,{SUCCESSMSG_W}
+    COPY WORD %DI,161
+    CPSZ
+
+    BRANCH WORD {__main_tail}
+
+LABEL __word_fail
+    
+    ; WORD TEST FAILED
+    COPY WORD %SI,{FAILMSG_W}
+    COPY WORD %DI,241
+    CPSZ
+
+LABEL __main_tail
+    
+    BRANCH __mail_tail

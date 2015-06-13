@@ -20,6 +20,10 @@ function lex(input_str as string) as integer
 
     dim recog_state as byte = LC_UNKNOWN
 
+#ifdef LEXDEBUG
+    print "initial recog_state = LC_UNKNOWN"
+#endif
+
     lex_reset_storage
 
     for i = 1 to len(input_str)
@@ -30,33 +34,101 @@ function lex(input_str as string) as integer
 	        case chr(34) ' double quote
 	            if recog_state = LC_STR then
 	                lex_post_string b
+
+#ifdef LEXDEBUG
+    print "lex():  state transition (quote found) "; recog_state; "->";
+#endif                    
+
 	                recog_state = LC_UNKNOWN
+
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+
 	                b = ""
+                    if not (i + 1 >= len(input_str)) then
+                        if mid(input_str, i + 1, 1) = " " or mid(input_str, i + 1, 1) = "," then
+                            i += 1
+                            continue for
+                        end if
+                    end if
 	            else
+
+#ifdef LEXDEBUG
+    print "lex():  state transition (quote found) "; recog_state; "->";
+#endif                    
+
 	                recog_state = LC_STR
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+
 	            end if
 	        case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
 	            b = b & c
 	            if (recog_state <> LC_STR) and (recog_state <> LC_WORD) then
 	                if recog_state <> LC_FLOAT then
+
+#ifdef LEXDEBUG
+    print "lex():  state transition (found 0-9) "; recog_state; "->";
+#endif                    
+
+
 	                    recog_state = LC_NUM
+
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+
 	                end if
 	            end if
-            case "a", "A", "b", "B", "c", "C", "e", "E", "f", "F"
+            case "a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"
                 if recog_state = LC_NUM then
                     hex_number = 1
                     b = b & ucase(c)
                 else
                     b = b & c
                 end if                                
+            case "h"
+                if recog_state = LC_NUM and (mid(input_str, i + 1, 1) = " " or mid(input_str, i + 1, 1) = "," or i = len(input_str)) then
+                    hex_number = 1
+                else
+                    b = b & c
+                end if
 	        case "."
 	            b = b & c
 	            if (recog_state <> LC_STR) and (recog_state <> LC_WORD) then
+
+#ifdef LEXDEBUG
+    print "lex():  state transition (found .) "; recog_state; "->";
+#endif                    
+
 	                recog_state = LC_FLOAT
+
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+
 	            end if
 	        case " ", ","
                 leader = ""
-                if hex_number = 1 then leader = "&H"
+                if hex_number = 1 and mid(input_str, i - 1, 1) = "h" then 
+                    leader = "&H"
+                else
+
+                    if (recog_state <> LC_NUM) and (recog_state <> LC_STR) then
+
+#ifdef LEXDEBUG
+    print "lex():  state transition (found delimiter) "; recog_state; "->";
+#endif                    
+                        recog_state = LC_WORD
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+                    end if
+
+                end if
+
 	            if recog_state = LC_NUM then
 	                if val(leader & b) < 256 then                    
 	                    lex_post_byte cubyte(val(leader & b))                       
@@ -88,10 +160,25 @@ function lex(input_str as string) as integer
     '
     ' handle running off the end with no space found
     '
-    if recog_state = LC_NUM then
-        leader = ""
-        if hex_number = 1 then leader = "&H"
-    
+
+    leader = ""
+    if hex_number = 1 and mid(input_str, i - 1, 1) = "h" then 
+        leader = "&H"
+    else
+
+        if (recog_state <> LC_NUM) and (recog_state <> LC_STR) then
+#ifdef LEXDEBUG
+    print "lex():  state transition "; recog_state; "->";
+#endif                    
+            recog_state = LC_WORD
+#ifdef LEXDEBUG
+    print recog_state
+#endif
+        end if
+
+    end if        
+
+    if recog_state = LC_NUM then                
         if val(leader & b) < 256 then 
             lex_post_byte cubyte(val(leader & b))
         elseif val(leader & b) >= 256 then
@@ -128,6 +215,10 @@ end function
 sub lex_reset_storage()
     dim i as integer
 
+#ifdef LEXDEBUG
+    print "lex_reset_storage():  called"
+#endif
+
     for i = 0 to (LEXSIZE - 1)
         with lexer_entries(i)
             .lexer_class = LC_UNKNOWN
@@ -142,6 +233,12 @@ sub lex_reset_storage()
 end sub
 
 sub lex_post_word(input_string as string)
+
+#ifdef LEXDEBUG
+    print "lex_post_word():  "; input_string
+#endif
+
+
 
     hex_number = 0
 
@@ -160,6 +257,11 @@ sub lex_post_word(input_string as string)
 end sub
 
 sub lex_post_string(input_string as string)
+
+#ifdef LEXDEBUG
+    print "lex_post_string():  "; input_string
+#endif
+
 
     hex_number = 0
 
@@ -180,6 +282,11 @@ end sub
 
 sub lex_post_byte(input_byte as ubyte)
 
+#ifdef LEXDEBUG
+    print "lex_post_byte():  "; input_byte
+#endif
+
+
     hex_number = 0
     
     with lexer_entries(lexer_index)
@@ -198,6 +305,11 @@ sub lex_post_byte(input_byte as ubyte)
 end sub
 
 sub lex_post_int(input_int as ushort)
+
+#ifdef LEXDEBUG
+    print "lex_post_int():  "; input_int
+#endif
+
     
     hex_number = 0
 

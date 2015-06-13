@@ -7,7 +7,7 @@
 ; 
     
     PROGRAM TITLE 'ROM'
-    ORIGIN 1                    ; ROM CODE BEGINS AT 0000:0001
+    ORIGIN 0                    ; ROM CODE BEGINS AT 0000:0001
 
     EQU VID_PAGE 1              ; VIDEO BUFFER IS AT 0001:0000 - 0001:07D0
     EQU VID_BASE 0              ; VIDEO BUFFER BASE OFFSET
@@ -52,9 +52,9 @@ LABEL __term_print_string
     ;;
     ;; PRESERVE REGISTERS
     ;; 
-    PUSH WORD %SS
-    PUSH WORD %DS
-    PUSH WORD %DI
+    ;PUSH WORD %SS
+    ;PUSH WORD %DS
+    ;PUSH WORD %DI
     
     COPY WORD %DS,{VID_PAGE}   
     COPY WORD %DI,#{TERM_PTR}
@@ -66,11 +66,9 @@ LABEL __term_print_string
     ;;
     ;; RESTORE REGISTERS AND RETURN
     ;;
-    POP WORD %DI
-    POP WORD %DS
-    POP WORD %SS
+    ;POP WORD %DI
+    ;POP WORD %DS
+    ;POP WORD %SS
 
     SRET
-
     
-

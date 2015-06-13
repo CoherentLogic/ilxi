@@ -2,6 +2,7 @@
 ' asm.bi
 '
 common shared asm_offset as ushort
+common shared dasm_offset as ushort
 
 #define O_MASK &H80
 #define AMOD_MASK &H78
@@ -37,3 +38,4 @@ declare sub asm_assemble(instruction as string)
 declare function asm_disassemble(page as ushort, offset as ushort) as string
 declare function asm_bytes_to_ushort(lsb as ubyte, msb as ubyte) as ushort
 declare sub asm_assemble_interactive(origin_address as ushort)
+declare sub asm_disassemble_range(page as ushort, start_offset as ushort, count as ushort)

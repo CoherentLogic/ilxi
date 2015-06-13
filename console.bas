@@ -26,7 +26,7 @@ sub console_attach()
 end sub
 
 sub console_init()
-
+    console_mutex = mutexcreate()
 end sub
 
 sub console_reset()
@@ -42,8 +42,13 @@ sub console_output(port_number as ushort, value as ushort)
 end sub
 
 sub console_cycle(byval userdata as any ptr)
+    
     dim i as integer
     dim c as ubyte
+
+
+    dim old_row as integer
+    dim old_col as integer
 
     dim col as ubyte = 1   'x 
     dim row as ubyte = 1   'y
@@ -51,6 +56,11 @@ sub console_cycle(byval userdata as any ptr)
     do
         col = 1
         row = 1
+
+        old_row = csrlin()
+        old_col = pos()
+
+        mutexlock console_mutex
 
 	    for i = CONSOLE_OFFSET to CONSOLE_LIMIT - 1
 	        c = st_read_byte(CONSOLE_PAGE, i)
@@ -62,8 +72,12 @@ sub console_cycle(byval userdata as any ptr)
 	        else
 	            col = col + 1
 	        end if
-	    next i
-	
+	    next i       
+
+        locate old_row, old_col	
+
+        mutexunlock console_mutex
+
 	    sleep 25
 
         if bus_get_stop_flag(0) = 1 then exit do
