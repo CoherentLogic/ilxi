@@ -1,5 +1,5 @@
-VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o
-XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
+XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
 FBCFLAGS = -g -mt 
 # -d STACKDEBUG
 # -d LEXDEBUG
@@ -28,6 +28,12 @@ xiasm.o: xiasm.bas
 
 ilxim: $(VM_OBJS)
 	fbc $(FBCFLAGS) -x ilxim $(VM_OBJS)
+
+profile.o: profile.bas
+	fbc $(FBCFLAGS) -o profile.o -c profile.bas
+
+config.o: config.bas
+	fbc $(FBCFLAGS) -o config.o -c config.bas
 
 asm.o: asm.bas
 	fbc $(FBCFLAGS) -o asm.o -c asm.bas
@@ -69,4 +75,4 @@ message.o: message.bas
 	fbc $(FBCFLAGS) -o message.o -c message.bas
 
 clean:
-	rm -f *.o ilxim xiasm rom.bin
+	rm -f *.o ilxim xiasm rom.bin t_stack.bin

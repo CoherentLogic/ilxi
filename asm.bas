@@ -631,7 +631,7 @@ function asm_disassemble(page as ushort, offset as ushort) as string
                 msb = st_read_byte(page, offset)
                 addr = asm_bytes_to_ushort(lsb, msb)
 
-                tmp_str &= trim(str(addr))                                                        
+                tmp_str &= trim(hex(addr)) & "h"                                                        
             
             case AM_REGD  'register direct
             
@@ -645,12 +645,12 @@ function asm_disassemble(page as ushort, offset as ushort) as string
                 msb = st_read_byte(page, offset)
                 addr = asm_bytes_to_ushort(lsb, msb)
 
-                tmp_str &= "#" & trim(str(addr))                                                                
+                tmp_str &= "#" & trim(hex(addr)) & "h"                                                                
 
             case AM_REGDD 'reg. direct + disp
 
                 reg = st_read_byte(page, offset)
-                tmp_str &= "%" & asm_decode_register(reg) & "+" & trim(str(displacement))
+                tmp_str &= "%" & asm_decode_register(reg) & "+" & trim(hex(displacement)) & "h"
 
             case AM_MEMDD 'mem. direct + disp
 
@@ -659,7 +659,7 @@ function asm_disassemble(page as ushort, offset as ushort) as string
                 msb = st_read_byte(page, offset)
                 addr = asm_bytes_to_ushort(lsb, msb)
 
-                tmp_str &= "#" & trim(str(addr)) & "+" & trim(str(displacement))                                        
+                tmp_str &= "#" & trim(hex(addr)) & "h+" & trim(hex(displacement)) & "h"                                       
             case AM_REGI  'register indirect
             
                 reg = st_read_byte(page, offset)
@@ -672,11 +672,11 @@ function asm_disassemble(page as ushort, offset as ushort) as string
                 msb = st_read_byte(page, offset)
                 addr = asm_bytes_to_ushort(lsb, msb)
 
-                tmp_str &= "(#" & trim(str(addr)) & ")"
+                tmp_str &= "(#" & trim(hex(addr)) & "h)"
             case AM_REGID 'reg. indirect + disp
     
                 reg = st_read_byte(page, offset)
-                tmp_str &= "(%" & asm_decode_register(reg) & ")+" & trim(str(displacement))
+                tmp_str &= "(%" & asm_decode_register(reg) & ")+" & trim(hex(displacement)) & "h"
             
             case AM_MEMID 'mem. indirect + disp
                 lsb = st_read_byte(page, offset)
@@ -684,7 +684,7 @@ function asm_disassemble(page as ushort, offset as ushort) as string
                 msb = st_read_byte(page, offset)
                 addr = asm_bytes_to_ushort(lsb, msb)
 
-                tmp_str &= "(#" & trim(str(addr)) & ")+" & trim(str(displacement))
+                tmp_str &= "(#" & trim(hex(addr)) & "h)+" & trim(hex(displacement)) & "h"
 
         end select        
 
@@ -694,7 +694,7 @@ function asm_disassemble(page as ushort, offset as ushort) as string
 
     dasm_offset = offset
 
-    return tmp_str
+    return ucase(tmp_str)
 end function ' asm_disassemble()
 
 
@@ -711,7 +711,7 @@ sub asm_disassemble_range(page as ushort, start_offset as ushort, count as ushor
 
         print ilxi_pad_left(hex(page), "0", 4); ":";
         print ilxi_pad_left(hex(dasm_offset), "0", 4); "  ";
-        print asm_disassemble(page, dasm_offset)
+        print ucase(asm_disassemble(page, dasm_offset))
 
         dasm_offset += 1
 

@@ -1,0 +1,8 @@
+
+[console]
+mode=serial
+port=COM
+bps=9600
+parity=N
+data_bits=8
+stop_bits=1

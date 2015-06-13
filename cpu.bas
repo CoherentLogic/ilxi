@@ -86,8 +86,6 @@ sub cpu()
     dim data_type as ubyte
 
     cpu_clear_flag FL_HALT
-    cls
-
     bus_start
 
     ' main cpu loop

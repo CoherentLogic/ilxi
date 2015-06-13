@@ -84,5 +84,5 @@ LABEL __word_fail
     CPSZ
 
 LABEL __main_tail
-    
-    BRANCH __mail_tail
+
+    HLT
