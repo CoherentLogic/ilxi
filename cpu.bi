@@ -143,6 +143,8 @@
 #define REG_SI "si"
 #define REG_DI "di"
 
+#define REG_BP "bp"
+
 #define REG_GA "ga"
 #define REG_GB "gb"
 #define REG_GC "gc"
@@ -193,6 +195,8 @@
 
 #define NREG_SI 27
 #define NREG_DI 28
+
+#define NREG_BP 30
 
 #define NREG_GA 40
 #define NREG_GB 41
@@ -280,6 +284,8 @@ type t_cpu_state
      si as ushort   'source index
      di as ushort   'dest index
 
+     bp as ushort   'base pointer
+
      ga as ushort	'general a
      gb as ushort	'general b
      gc	as ushort	'general c
@@ -298,17 +304,10 @@ type t_cpu_state
      gp as ushort	'general p
 end type
 
-type t_instruction
-     opcode as byte
-     src_amod as byte
-     src_bytecount as byte
-     src_address(256) as byte
-     dst_amod as byte
-     dst_bytecount as byte
-     dst_address(256) as byte
-end type
-
 common shared cpu_state as t_cpu_state
+
+dim shared interrupt_queue() as ubyte
+dim shared interrupts_waiting as integer
 
 declare sub init_cpu()
 declare function cpu_get_cppc() as string
@@ -328,3 +327,5 @@ declare sub cpu_push_byte(byteval as ubyte)
 declare function cpu_pop_byte() as ubyte
 declare sub cpu_push_word(wordval as ushort)
 declare function cpu_pop_word() as ushort
+declare sub cpu_queue_interrupt(interrupt_number as ubyte)
+declare sub cpu_process_interrupts()

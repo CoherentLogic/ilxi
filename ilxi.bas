@@ -84,7 +84,7 @@ sub cli()
                 end if
 
                 st_save_page img_file, page_index
-            case "assemble"
+            case "assemble", "a"
                 dim le_origin as lexer_entry
                 dim origin_addr as ushort
 
@@ -116,10 +116,14 @@ sub cli()
 
                 asm_disassemble_range page_addr, start_offset_addr, da_count
 
-            case "step"
-                cpu_clear_flag FL_DEBUG
-                cpu_set_flag FL_DEBUG
-                cpu
+            case "step"            
+                if cpu_get_flag(FL_HALT) = 0 then
+                    if cpu_get_flag(FL_DEBUG) = 0 then cpu_set_flag FL_DEBUG
+                    cpu             	    
+                else
+                    message_print "cli():  CPU is halted. Type 'reset' at the prompt before attempting 'step'."
+                end if
+
 	        case "getr"
 	            ilxi_getr get_lexer_entry(1).strval
 	        case "setr"
@@ -217,8 +221,12 @@ sub cli()
 	        case "ver"
 	       	    print "ILXI 0.1"
 	        case "run"
-                cpu_clear_flag FL_DEBUG
-	       	    cpu
+                if cpu_get_flag(FL_HALT) = 0 then
+                    cpu_clear_flag FL_DEBUG
+               	    cpu
+                else
+                    message_print "cli():  CPU is halted. Type 'reset' at the prompt before attempting 'run'."
+                end if
 	        case "reset"
 	            init_cpu	            
             case "exit"
@@ -231,7 +239,7 @@ sub cli()
 end sub
 
 sub ilxi_getr(register as string)   
-    message_print ucase(register) & ": " & trim(str(cpu_get_reg_alpha(lcase(register))))
+    message_print ucase(register) & ": " & trim(hex(cpu_get_reg_alpha(lcase(register))))
 end sub
 
 sub ilxi_setr(register as string, value as integer)

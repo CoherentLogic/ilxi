@@ -43,14 +43,21 @@ end sub
 
 sub bus_start()
     
+    if bus_started = 1 then exit sub
+
     dim i as integer
 
     for i = 1 to dev_count
         message_print "bus_start():  starting device " & devices(i)
 
         bus(devices(i)).dev_thread = threadcreate(bus(devices(i)).dev_cycle, @devices(i))
-        bus(devices(i)).dev_thread_started = 1
+        bus(devices(i)).dev_thread_started = 1        
     next i
+
+    message_print "bus_start():  waiting for bus quiescence"
+    sleep 500
+
+    bus_started = 1
 
 end sub
 
@@ -70,6 +77,8 @@ sub bus_stop()
 
         end if
     next i
+
+    bus_started = 0
 
 end sub
 

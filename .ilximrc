@@ -1,7 +1,7 @@
 
 [console]
 mode=serial
-port=COM
+port=/dev/ilxim
 bps=9600
 parity=N
 data_bits=8

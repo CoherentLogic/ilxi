@@ -9,13 +9,14 @@
 #include "ilxi.bi"
 #include "error.bi"
 #include "bus.bi"
+#include "message.bi"
 
 function inst_getbyte(op as t_operand, page as integer) as ubyte
 
     if op.register = 1 then
         if op.indirect = 0 then                'register direct
             select case op.low_byte
-                case NREG_LA, NREG_LB, NREG_LC, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
+                case NREG_LA, NREG_LB, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
                     return cubyte(cpu_get_reg(op.low_byte))
                 case else
                     machine_error ERR_INVALID_DATA_TYPE, 10
@@ -34,6 +35,12 @@ function inst_getbyte(op as t_operand, page as integer) as ubyte
             return st_read_byte(page, ptr_val + op.displacement)    
         end if
     elseif op.immediate = 1 then
+
+
+#ifdef INSTDEBUG    
+        message_print "inst_getbyte():  immediate " & hex(op.low_byte)
+#endif
+
         return op.low_byte
     end if
 
@@ -45,7 +52,7 @@ function inst_getword(op as t_operand, page as integer) as ushort
         if op.indirect = 0 then                'register direct
 
             select case op.low_byte
-                case NREG_LA, NREG_LB, NREG_LC, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
+                case NREG_LA, NREG_LB, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
                     machine_error ERR_INVALID_DATA_TYPE, 10
                 case else
                     return cpu_get_reg(op.low_byte)
@@ -70,11 +77,12 @@ end function ' inst_getword()
 
 sub inst_setbyte(op as t_operand, page as integer, value as ubyte)
 
+
     if op.register = 1 then
         if op.indirect = 0 then                'register direct
 
             select case op.low_byte
-                case NREG_LA, NREG_LB, NREG_LC, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
+                case NREG_LA, NREG_LB, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
                     cpu_set_reg op.low_byte, value
                 case else
                     machine_error ERR_INVALID_DATA_TYPE, 10
@@ -101,13 +109,11 @@ end sub ' inst_setbyte()
 
 sub inst_setword(op as t_operand, page as integer, value as ushort)
 
-    print "inst_setword():  "; value
-
     if op.register = 1 then
         if op.indirect = 0 then                'register direct
 
             select case op.low_byte
-                case NREG_LA, NREG_LB, NREG_LC, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
+                case NREG_LA, NREG_LB, NREG_LC, NREG_LD, NREG_LE, NREG_HA, NREG_HB, NREG_HC, NREG_HD, NREG_HE
                     machine_error ERR_INVALID_DATA_TYPE, 10
                     exit sub
                 case else
@@ -388,6 +394,9 @@ sub inst_shl(dest as t_operand, count as t_operand)
             end if
 
             inst_setbyte dest, cpu_state.dp, cubyte(result)
+    
+            if a2 >= 8 then cpu_set_flag FL_OVERFLOW
+            
         case DT_WORD
             a1 = inst_getword(dest, cpu_state.dp)
             a2 = inst_getword(count, cpu_state.dp)
@@ -399,10 +408,13 @@ sub inst_shl(dest as t_operand, count as t_operand)
             end if
 
             inst_setword dest, cpu_state.dp, cushort(result)
+
+            if a2 >= 16 then cpu_set_flag FL_OVERFLOW
+
     end select
 
     if result = 0 then cpu_set_flag FL_ZERO
-
+    
 end sub ' inst_shl()
 
 sub inst_shr(dest as t_operand, count as t_operand)
@@ -432,6 +444,9 @@ sub inst_shr(dest as t_operand, count as t_operand)
             end if
 
             inst_setbyte dest, cpu_state.dp, cubyte(result)
+
+            if a2 >= 8 then cpu_set_flag FL_OVERFLOW
+
         case DT_WORD
             a1 = inst_getword(dest, cpu_state.dp)
             a2 = inst_getword(count, cpu_state.dp)
@@ -443,6 +458,8 @@ sub inst_shr(dest as t_operand, count as t_operand)
             end if
 
             inst_setword dest, cpu_state.dp, cushort(result)
+
+            if a2 >= 16 then cpu_set_flag FL_OVERFLOW
     end select
 
     if result = 0 then cpu_set_flag FL_ZERO
@@ -713,11 +730,20 @@ sub inst_icall(dest as t_operand)
         exit sub
     end if
 
-    
+
+    cpu_queue_interrupt inst_getbyte(dest, cpu_state.dp)    
+
 end sub ' inst_icall()
 
 sub inst_sret()
-    cpu_state.pc = cpu_pop_word()
+    dim new_pc as ushort = cpu_pop_word()
+
+
+#ifdef INSTDEBUG
+    message_print "inst_sret():  returning to " & hex(new_pc)
+#endif
+
+    cpu_state.pc = new_pc
 end sub ' inst_sret()
 
 sub inst_lret()

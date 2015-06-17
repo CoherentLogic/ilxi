@@ -31,6 +31,8 @@ dim shared io_ports(0 to IOPORT_COUNT - 1) as short
 dim shared devices() as ubyte
 dim shared dev_count as ubyte = 0
 
+dim shared bus_started as ubyte = 0
+
 declare sub bus_clear()
 declare sub bus_init()
 declare sub bus_start()

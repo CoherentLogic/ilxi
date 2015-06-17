@@ -156,11 +156,19 @@ sub console_cycle_serial(byval userdata as any ptr)
     dim col as ubyte = 1   'x 
     dim row as ubyte = 1   'y
 
+    dim bytes_waiting as integer
+    dim input_buffer as string
+
     do
+        bytes_waiting = lof(console_file_number)
+
+        if bytes_waiting > 0 then
+            message_print "console_cycle_serial():  reading " & bytes_waiting & " bytes from console"
+            input_buffer &= input(bytes_waiting, console_file_number)
+        end if
+
         col = 1
         row = 1
-
-        mutexlock console_mutex
 
 	    for i = CONSOLE_OFFSET to CONSOLE_LIMIT - 1
 	        c = st_read_byte(CONSOLE_PAGE, i)
@@ -178,9 +186,7 @@ sub console_cycle_serial(byval userdata as any ptr)
 	        end if
 	    next i       
 
-        mutexunlock console_mutex
-
-	    sleep 25
+	    sleep 25, 1
 
         if bus_get_stop_flag(0) = 1 then exit do
     loop

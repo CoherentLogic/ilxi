@@ -24,3 +24,4 @@
 #define ERR_INVALID_DATA_TYPE 151
 
 declare sub machine_error(error_code as integer, severity as integer)
+declare function error_string(error_code as integer) as string

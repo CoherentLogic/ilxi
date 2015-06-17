@@ -10,9 +10,13 @@
 #include "console.bi"
 #include "bus.bi"
 #include "signal.bi"
+#include "error.bi"
 #include "message.bi"
 
 sub init_cpu()
+
+    interrupts_waiting = 0
+    redim interrupt_queue(0 to interrupts_waiting) as ubyte
             
 	with cpu_state
 		.pc = 0
@@ -90,6 +94,14 @@ sub cpu()
 
     ' main cpu loop
     do	  
+
+#ifdef INSTDEBUG
+    message_print cpu_get_cppc() & "  executing " & asm_disassemble(cpu_state.cp, cpu_state.pc)
+#endif        
+
+        if cpu_get_flag(FL_DEBUG) = 1 then
+            message_print cpu_get_cppc() & "  " & asm_disassemble(cpu_state.cp, cpu_state.pc)
+        end if
 
         inst_pc = cpu_state.pc
         opcode = cpu_fetch()
@@ -266,21 +278,27 @@ sub cpu()
             cpu_state.es = 0
         end if
 
-        if cpu_get_flag(FL_HALT) then exit do
+        if cpu_get_flag(FL_HALT) then 
+            bus_stop
+            exit do
+        end if
+
+        cpu_process_interrupts
+
         if cpu_get_flag(FL_DEBUG) then exit do        
+
     loop
 
-    bus_stop
+
 
 
     if cpu_get_flag(FL_DEBUG) = 0 then
 	    if cpu_state.es > 0 then
-	        message_print "cpu(): trap at " & cpu_get_cppc()
+	        message_print "cpu():  trap " & cpu_state.ec & " (severity " & cpu_state.es & ") at " & cpu_get_cppc() & " '" & error_string(cpu_state.ec) & "'"
+            message_print cpu_get_cppc() & "  " & asm_disassemble(cpu_state.pc, cpu_state.pc)                     
 	    else
-	        message_print "cpu(): halt at " & cpu_get_cppc()
+	        message_print "cpu():  halt at " & cpu_get_cppc()
 	    end if           
-    else
-        message_print cpu_get_cppc() & "  " & asm_disassemble(cpu_state.cp, cpu_state.pc)
     end if
 
 end sub ' cpu()
@@ -295,18 +313,21 @@ function cpu_fetch() as ubyte
 end function ' cpu_fetch()
 
 sub cpu_push_byte(byteval as ubyte)
-    st_write_byte cpu_state.sp, cpu_state.so, byteval
-    
+
 #ifdef STACKDEBUG
     message_print "cpu_push_byte():  " & hex(byteval)
 #endif
 
-    cpu_state.so -= 1
+    cpu_state.so -= 1    
+    st_write_byte cpu_state.sp, cpu_state.so, byteval    
+
+
 end sub ' cpu_push_byte()
 
 function cpu_pop_byte() as ubyte
-    dim retval as ubyte
-    
+
+    dim retval as ubyte     
+
     retval = st_read_byte(cpu_state.sp, cpu_state.so)
     cpu_state.so += 1
 
@@ -318,27 +339,29 @@ function cpu_pop_byte() as ubyte
 end function ' cpu_pop_byte()
 
 sub cpu_push_word(wordval as ushort)
-    st_write_word cpu_state.sp, cpu_state.so - 1, wordval
 
 #ifdef STACKDEBUG
-    locate 30,1
     message_print "cpu_push_word():  " & hex(wordval)
 #endif
 
-    cpu_state.so -= 1
+    cpu_state.so -= 2
+    st_write_word cpu_state.sp, cpu_state.so, wordval
+
 end sub ' cpu_push_word()
 
 function cpu_pop_word() as ushort
+
     dim retval as ushort
 
     retval = st_read_word(cpu_state.sp, cpu_state.so)
+    cpu_state.so += 2
 
 #ifdef STACKDEBUG
-    locate 30,1
     message_print "cpu_pop_word():  " & hex(retval)
-#endif
+#endif       
 
-    cpu_state.so += 2
+    return retval
+
 end function ' cpu_pop_word()
 
 sub cpu_dump_state()
@@ -353,7 +376,7 @@ sub cpu_dump_state()
     print ""
     print "PC "; ilxi_pad_left(hex(x.pc),"0",4), "EC "; ilxi_pad_left(hex(x.ec),"0",4), "ES "; ilxi_pad_left(hex(x.es),"0",4), "CP "; ilxi_pad_left(hex(x.cp),"0",4), "DP "; ilxi_pad_left(hex(x.dp),"0",4)
     print "EP "; ilxi_pad_left(hex(x.ep),"0",4), "SP "; ilxi_pad_left(hex(x.sp),"0",4), "SO "; ilxi_pad_left(hex(x.so),"0",4), "FL "; ilxi_pad_left(hex(x.fl),"0",4), "SS "; ilxi_pad_left(hex(x.ss),"0",4)
-    print "DS "; ilxi_pad_left(hex(x.ds),"0",4), "SI "; ilxi_pad_left(hex(x.ds),"0",4), "DI "; ilxi_pad_left(hex(x.di),"0",4)
+    print "DS "; ilxi_pad_left(hex(x.ds),"0",4), "SI "; ilxi_pad_left(hex(x.ds),"0",4), "DI "; ilxi_pad_left(hex(x.di),"0",4), "BP "; ilxi_pad_left(hex(x.bp),"0",4)
     print ""
     print "GA "; ilxi_pad_left(hex(x.ga),"0",4), "GB "; ilxi_pad_left(hex(x.gb),"0",4), "GC "; ilxi_pad_left(hex(x.gc),"0",4), "GD "; ilxi_pad_left(hex(x.gd),"0",4), "GE "; ilxi_pad_left(hex(x.ge),"0",4)
     print "GF "; ilxi_pad_left(hex(x.gf),"0",4), "GG "; ilxi_pad_left(hex(x.gg),"0",4), "GH "; ilxi_pad_left(hex(x.gh),"0",4), "GI "; ilxi_pad_left(hex(x.gi),"0",4), "GJ "; ilxi_pad_left(hex(x.gj),"0",4)
@@ -427,6 +450,8 @@ sub cpu_set_reg_alpha(register as string, value as ushort)
              cpu_state.si = value
         case REG_DI
              cpu_state.di = value
+        case REG_BP
+             cpu_state.bp = value
 	    case REG_GA
 	    	 cpu_state.ga = value
 	    case REG_GB
@@ -515,6 +540,8 @@ function cpu_get_reg_alpha(register as string) as ushort
             return cpu_state.si
         case REG_DI
             return cpu_state.di
+        case REG_BP
+            return cpu_state.bp
 	    case REG_GA
 	    	 return cpu_state.ga
 	    case REG_GB
@@ -603,6 +630,8 @@ sub cpu_set_reg(register as ubyte, value as ushort)
              cpu_state.si = value
         case NREG_DI
              cpu_state.di = value
+        case NREG_BP
+             cpu_state.bp = value
 	    case NREG_GA
 	    	 cpu_state.ga = value
 	    case NREG_GB
@@ -692,6 +721,8 @@ function cpu_get_reg(register as ubyte) as ushort
              return cpu_state.si
         case NREG_DI
              return cpu_state.di
+        case NREG_BP
+             return cpu_state.bp
 	    case NREG_GA
 	    	 return cpu_state.ga
 	    case NREG_GB
@@ -750,3 +781,25 @@ function cpu_get_reg(register as ubyte) as ushort
     end select
 
 end function ' cpu_get_reg()
+
+sub cpu_queue_interrupt(interrupt_number as ubyte)
+    
+    interrupts_waiting += 1
+
+    redim preserve interrupt_queue(0 to interrupts_waiting) as ubyte
+    interrupt_queue(interrupts_waiting) = interrupt_number
+
+end sub ' cpu_queue_interrupt()
+
+sub cpu_process_interrupts()
+
+    dim i as integer
+
+    for i = 1 to interrupts_waiting
+        message_print "cpu_process_interrupts():  dispatching interrupt " & trim(str(interrupt_queue(i)))
+    next i    
+
+    interrupts_waiting = 0
+    redim interrupt_queue(0 to interrupts_waiting) as ubyte
+
+end sub ' cpu_process_interrupts()

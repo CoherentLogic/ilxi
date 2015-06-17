@@ -4,6 +4,8 @@
 
 #include "message.bi"
 #include "console.bi"
+#include "cpu.bi"
+#include "asm.bi"
 
 sub message_init()
 

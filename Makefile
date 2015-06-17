@@ -1,8 +1,6 @@
 VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
 XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
-FBCFLAGS = -g -mt 
-# -d STACKDEBUG
-# -d LEXDEBUG
+FBCFLAGS = -g -mt #-d STACKDEBUG -d INSTDEBUG #-d LEXDEBUG
 
 all: vm assembler rom test
 

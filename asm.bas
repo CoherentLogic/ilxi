@@ -228,6 +228,8 @@ function asm_encode_register(register_name as string) as ubyte
             return NREG_SI
         case "di"
             return NREG_DI
+        case "bp"
+            return NREG_BP
         case "ga"
             return NREG_GA
         case "gb"
@@ -311,6 +313,8 @@ function asm_decode_register(reg as ubyte) as string
             return "si"
         case NREG_DI
             return "di"
+        case NREG_BP
+            return "bp"
         case NREG_GA
             return "ga"
         case NREG_GB
