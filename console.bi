@@ -2,6 +2,26 @@
 ' console.bi
 '
 
+'
+' I/O PORT USAGE
+'
+' OUT
+'
+'   IOBASE   +  0:  1 = Enable Cursor; 0 = Disable Cursor
+'               1:  Set refresh sleep value (ms)
+'               2:  Set horizontal offset
+'               3:  Set vertical offset
+'               4:  Write to this port to clear video buffer
+'
+' IN
+'
+'   IOBASE   +  0:  Read cursor enable value
+'               1:  Read refresh sleep value (ms)
+'               2:  Read horizontal offset
+'               3:  Read vertical offset
+'               4:  Nonsense!
+
+
 #define CONSOLE_PAGE &H0001
 #define CONSOLE_OFFSET &H0000
 #define CONSOLE_LIMIT &H07D0
@@ -17,7 +37,14 @@ dim shared console_parity as string
 dim shared console_data_bits as string
 dim shared console_stop_bits as string
 
+dim shared horizontal_offset as ushort = 0
+dim shared vertical_offset as ushort = 0
+dim shared sleep_duration as ushort = 50
+dim shared cursor_enabled as ushort = 1
+
 dim shared console_file_number as integer
+
+dim shared console_io_base as ushort
 
 declare sub console_attach()
 declare sub console_init_local()

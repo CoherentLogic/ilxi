@@ -48,7 +48,7 @@ sub bus_start()
     dim i as integer
 
     for i = 1 to dev_count
-        message_print "bus_start():  starting device " & devices(i)
+        message_print "bus_start():  starting device " & devices(i) & " (" & rtrim(bus(devices(i)).dev_tag) & ")"
 
         bus(devices(i)).dev_thread = threadcreate(bus(devices(i)).dev_cycle, @devices(i))
         bus(devices(i)).dev_thread_started = 1        
@@ -58,7 +58,8 @@ sub bus_start()
     sleep 500
 
     bus_started = 1
-
+    message_print "bus_start():  system bus is ready"
+    
 end sub
 
 sub bus_stop()

@@ -23,12 +23,12 @@ type t_operand
     data_type as ubyte ' 0 = byte, 1 = word
 end type
 
-declare function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
+declare function asm_encode_amod(data_type as ubyte, amod as ubyte, disp as ubyte) as ubyte
 declare function asm_amod_datatype(amod as ubyte) as ubyte
 declare function asm_amod_amod(amod as ubyte) as ubyte
 declare function asm_amod_disp(amod as ubyte) as ubyte
 declare function asm_decode_disp(disp as ubyte) as ushort
-declare function asm_encode_address(ops_following as ubyte, addr_string as string) as t_operand
+declare function asm_encode_address(data_type as ubyte, addr_string as string) as t_operand
 declare function asm_encode_register(register_name as string) as ubyte
 declare function asm_decode_register(reg as ubyte) as string
 declare function asm_encode_opcode(instruction as string) as ubyte

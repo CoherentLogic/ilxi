@@ -12,7 +12,7 @@
 #include "console.bi"
 
 
-function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) as ubyte
+function asm_encode_amod(data_type as ubyte, amod as ubyte, disp as ubyte) as ubyte
     '  7 6543 210
     ' +-+----+---+
     ' |O|MOD |DSP|
@@ -22,10 +22,10 @@ function asm_encode_amod(ops_following as ubyte, amod as ubyte, disp as ubyte) a
     '  8
     dim	t as ubyte = 0
 
-    if ops_following = 1 then
-        t or= (1 shl 7)
+    if data_type = DT_WORD then
+        t or= (DT_WORD shl 7)
     else
-        t or= (0 shl 7)
+        t or= (DT_BYTE shl 7)
     end if    
 
     t or= (amod shl 3)   
@@ -67,7 +67,7 @@ function asm_decode_disp(disp as ubyte) as ushort
     end select       
 end function ' asm_decode_disp()
 
-function asm_encode_address(ops_following as ubyte, addr_string as string) as t_operand
+function asm_encode_address(data_type as ubyte, addr_string as string) as t_operand
     '
     '   xxxx    immediate    AM_IMM
     '   %ga     reg direct   AM_REGD
@@ -142,33 +142,33 @@ function asm_encode_address(ops_following as ubyte, addr_string as string) as t_
     end if
 
     if is_immediate = 1 then                ' immediate
-        amod = asm_encode_amod(ops_following, AM_IMM, displacement)        
+        amod = asm_encode_amod(data_type, AM_IMM, displacement)        
     elseif is_register = 1 then
         if is_indirect = 1 then
             if has_displacement = 1 then    ' register indirect + displacement
-                amod = asm_encode_amod(ops_following, AM_REGID, displacement) 
+                amod = asm_encode_amod(data_type, AM_REGID, displacement) 
             else                            ' reigster indirect, no displacement
-                amod = asm_encode_amod(ops_following, AM_REGI, displacement)
+                amod = asm_encode_amod(data_type, AM_REGI, displacement)
             end if          
         else                                
             if has_displacement = 1 then    ' register direct + displacement
-                amod = asm_encode_amod(ops_following, AM_REGDD, displacement)
+                amod = asm_encode_amod(data_type, AM_REGDD, displacement)
             else                            ' register direct, no displacement
-                amod = asm_encode_amod(ops_following, AM_REGD, displacement)
+                amod = asm_encode_amod(data_type, AM_REGD, displacement)
             end if
         end if
     elseif is_memory = 1 then
         if is_indirect = 1 then
             if has_displacement = 1 then    ' memory indirect + displacement
-                amod = asm_encode_amod(ops_following, AM_MEMID, displacement) 
+                amod = asm_encode_amod(data_type, AM_MEMID, displacement) 
             else                            ' memory indirect, no displacement
-                amod = asm_encode_amod(ops_following, AM_MEMI, displacement)
+                amod = asm_encode_amod(data_type, AM_MEMI, displacement)
             end if          
         else                                
             if has_displacement = 1 then    ' memory direct + displacement
-                amod = asm_encode_amod(ops_following, AM_MEMDD, displacement)
+                amod = asm_encode_amod(data_type, AM_MEMDD, displacement)
             else                            ' memory direct, no displacement
-                amod = asm_encode_amod(ops_following, AM_MEMD, displacement)
+                amod = asm_encode_amod(data_type, AM_MEMD, displacement)
             end if
         end if
     end if
@@ -519,8 +519,8 @@ sub asm_assemble(instruction as string)
     dim operand_count as integer = 0
     dim opcode as ubyte = 0
     dim operand as t_operand
-    dim ops_following as ubyte = 0
     dim data_type as ubyte = 0
+
 
     dim i as integer
 
@@ -591,7 +591,7 @@ function asm_disassemble(page as ushort, offset as ushort) as string
     dim operand_count as ubyte
     dim i as ushort
     dim displacement as ushort
-    dim ops_following as ubyte
+    dim data_type as ubyte
     dim actual_amod as ubyte
     dim addr as ushort
     dim lsb as ubyte

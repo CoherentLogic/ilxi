@@ -14,7 +14,9 @@
 
     EQU ROM_DATA_PAGE 0         
     EQU ROM_STACK 10            ; ROM RESERVES PAGE 10 FOR STACK OPERATIONS
-    
+
+    EQU SPINNER_POS 75          ; SPINNER POSITION    
+
 LABEL __rom_start
     ;;  
     ;; JUMP TO ROM INITIALIZATION ROUTINE
@@ -33,14 +35,74 @@ LABEL __rom_init
     COPY WORD %SP,{ROM_STACK}
 
     ;;
+    ;; DISABLE HARDWARE CURSOR AND SET SLEEP RATE
+    ;;
+    OUT WORD 0,1
+    OUT WORD 1,25
+    OUT WORD 2,10
+    OUT WORD 3,5
+
+    COPY BYTE %LA,92    ; \
+    COPY BYTE %LB,124   ; |
+    COPY BYTE %LC,47    ; /
+
+    COPY WORD %GD,0
+    COPY BYTE %LE,{SPINNER_POS}
+
+    ;;
     ;; PRINT ROM VERSION
     ;;
     COPY WORD %SS,%DP
     COPY WORD %SI,{ROM_VS}
 
     SCALL WORD {__term_print_string}
+
+LABEL __loop
     
-    BRANCH WORD {__rom_init}
+    CMP WORD %GD,2
+    BEQ WORD {__reset_counter}
+
+    ADD WORD %GD,1
+    BRANCH WORD {__no_reset}
+
+LABEL __reset_counter
+    
+    COPY WORD %GD,0
+    
+LABEL __no_reset
+
+    CMP WORD %GD,0
+    BEQ WORD {__backslash}
+
+    CMP WORD %GD,1
+    BEQ WORD {__pipe}
+
+    CMP WORD %GD,2
+    BEQ WORD {__fwdslash}
+    
+LABEL __backslash
+
+    COPY BYTE %HE,%LA
+    BRANCH WORD {__do_poke}
+    
+LABEL __pipe
+    
+    COPY BYTE %HE,%LB
+    BRANCH WORD {__do_poke}
+    
+LABEL __fwdslash
+
+    COPY BYTE %HE,%LC
+
+LABEL __do_poke
+    
+    PUSH WORD %DS
+    COPY WORD %DS,{VID_PAGE}
+    COPY BYTE (%LE),%HE
+    POP WORD %DS
+    
+    BRANCH WORD {__loop}
+
 
     ;; __term_print_string
     ;; 

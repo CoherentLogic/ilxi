@@ -1,6 +1,6 @@
 '
 ' console.bas
-'
+'               
 
 #include "console.bi"
 #include "storage.bi"
@@ -10,17 +10,17 @@
 
 sub console_attach()
 
-    dim dev as dev_entry
+    dim console_device as dev_entry
 
     dim console_mode as string = config_get("console", "mode")
     
     select case console_mode
         case "local"
 	
-	        with dev
+	        with console_device
 	            .dev_tag = "console"
 	            .io_base = 0
-	            .io_port_count = 4
+	            .io_port_count = 5
 	            .dev_init = @console_init_local
 	            .dev_reset = @console_reset_local
 	            .dev_cycle = @console_cycle_local
@@ -32,7 +32,7 @@ sub console_attach()
 
         case "serial"
 
-            with dev
+            with console_device
                 .dev_tag = "console"
                 .io_base = 0
                 .io_port_count = 4
@@ -54,7 +54,7 @@ sub console_attach()
     end select	
     
 
-    bus_attach 0, dev
+    bus_attach 0, console_device
 
 end sub
 
@@ -91,10 +91,54 @@ sub console_reset_serial()
 end sub
 
 function console_input(port_number as ushort) as ushort
-    return 0
+
+    select case port_number
+        case (console_io_base + 0)
+            return cursor_enabled
+        case (console_io_base + 1)
+            return sleep_duration
+        case (console_io_base + 2)
+            return horizontal_offset
+        case (console_io_base + 3)
+            return vertical_offset
+        case else
+            return 0
+    end select
+    
 end function
 
 sub console_output(port_number as ushort, value as ushort)
+
+    dim i as integer
+
+    select case port_number 
+        case (console_io_base + 0)
+
+            if value = 0 then
+                cursor_enabled = 0
+            else
+                cursor_enabled = 1
+            end if
+
+        case (console_io_base + 1)
+    
+            sleep_duration = value
+            
+        case (console_io_base + 2)
+
+            horizontal_offset = value
+
+        case (console_io_base + 3)
+
+            vertical_offset = value
+
+        case (console_io_base + 4)
+
+    	    for i = CONSOLE_OFFSET to CONSOLE_LIMIT - 1
+                st_write_byte CONSOLE_PAGE, i, 0
+            next i
+
+    end select
 
 end sub
 
@@ -136,7 +180,7 @@ sub console_cycle_local(byval userdata as any ptr)
 
         mutexunlock console_mutex
 
-	    sleep 25
+	    sleep sleep_duration, 1
 
         if bus_get_stop_flag(0) = 1 then exit do
     loop
@@ -174,7 +218,7 @@ sub console_cycle_serial(byval userdata as any ptr)
 	        c = st_read_byte(CONSOLE_PAGE, i)
 	        
 
-            output_str = chr(27) & "[" & trim(str(row)) & ";" & trim(str(col)) & "H" & chr(c)
+            output_str = chr(27) & "[" & trim(str(row + horizontal_offset)) & ";" & trim(str(col + vertical_offset)) & "H" & chr(c)
 
             print #console_file_number, output_str;
 	        
@@ -186,7 +230,7 @@ sub console_cycle_serial(byval userdata as any ptr)
 	        end if
 	    next i       
 
-	    sleep 25, 1
+	    sleep sleep_duration, 1
 
         if bus_get_stop_flag(0) = 1 then exit do
     loop

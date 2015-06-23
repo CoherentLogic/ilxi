@@ -10,13 +10,13 @@
 '
 'PC +  0      7 8 9  C D F 10     
 '     +--------+-+----+---+--------+
-'     |OPCODE  |O|MOD |DSP|OPERAND | 
+'     |OPCODE  |T|MOD |DSP|OPERAND | 
 '     +--------+-+----+---+--------+
 '     |BYTE 1  | BYTE 2   |BYTE 3  |
 '     +--------+----------+--------+
 '
 ' OPCODE    (instruction opcode) 0-255
-' O         (data type)   0 = byte; 1 = word
+' T         (data type)   0 = byte; 1 = word
 ' MOD       (addressing mode)  
 '           0   0000 = immediate
 '           1   0001 = register direct
