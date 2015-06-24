@@ -1,0 +1,65 @@
+;
+; diskboot.xa
+; 
+; Loads bootloader from disk 0, track 0, sector 0 and jumps to the loaded code.
+;
+
+
+    PROGRAM TITLE 'DISKBOOT'
+    ORIGIN 0
+
+    EQU DISK_BUF_PAGE 0
+    EQU DISK_BUF_OFFSET 200h
+
+    EQU VID_PAGE 1
+    EQU VID_BASE 0
+
+LABEL __boot_start
+    BRANCH WORD {__query_disk0}
+
+    VAR ZSTRING NO_DISK0 "BOOT ERROR: FIXED DISK 0 NOT INSTALLED"
+    
+LABEL __query_disk0
+
+    ;
+    ; get installed disk count into GA
+    ;
+
+    IN WORD %GA,240
+    CMP WORD %GA,1
+    BGE WORD {__load_boot}
+
+    ;
+    ; disk 0 is not installed. print error message and halt.
+    ;
+    COPY WORD %DS,{VID_PAGE}
+    COPY WORD %DI,{VID_BASE}
+    COPY WORD %SI,{NO_DISK0}
+    
+    CPSZ
+    HLT
+
+LABEL __load_boot
+    ;
+    ; set up disk transfer buffer at 0000:0200
+    ; (disk controller is at IOBASE 240)
+    ;
+    OUT WORD 241,{DISK_BUF_PAGE}
+    OUT WORD 242,{DISK_BUF_OFFSET}
+    
+    ;
+    ; select disk 0, track 0, sector 0
+    ;
+    OUT WORD 240,0
+    OUT WORD 243,0
+    OUT WORD 244,0
+
+    ;
+    ; read sector into buffer 
+    ;
+    OUT WORD 245,0
+    
+    ;
+    ; jump to loaded code
+    ;
+    BRANCH WORD {DISK_BUF_OFFSET}

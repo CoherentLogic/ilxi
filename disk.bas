@@ -8,23 +8,6 @@
 #include "config.bi"
 #include "message.bi"
 
-'
-' OUT
-'
-'   IOBASE   +  0:  Set channel 
-'               1:  Set sector memory buffer page
-'               2:  Set sector memory buffer offset
-'               3:  Set disk track for current channel
-'               4:  Set disk sector for current channel
-'               5:  Read current track/sector into sector memory buffer
-'               6:  Write current sector memory buffer to current track/sector
-'
-' IN
-'
-'   IOBASE   +  0:  Get installed channel count
-'               1:  Get track count for current channel
-'               2:  Get sectors-per-track count for current channel
-'
 
 sub disk_attach()
 
@@ -57,19 +40,11 @@ function disk_input(port_number as ushort) as ushort
 
     select case port_number
         case (disk_io_base + 0)
-
+            return installed_disk_count
         case (disk_io_base + 1)
-
+            return installed_disks(channel).track_count
         case (disk_io_base + 2)
-
-        case (disk_io_base + 3)
-
-        case (disk_io_base + 4)
-
-        case (disk_io_base + 5)
-
-        case (disk_io_base + 6)
-    
+            return installed_disks(channel).sectors_per_track
     end select
 
 
@@ -79,19 +54,19 @@ sub disk_output(port_number as ushort, value as ushort)
 
     select case port_number
         case (disk_io_base + 0)
-
+            channel = value
         case (disk_io_base + 1)
-
+            sect_buf_page = value
         case (disk_io_base + 2)
-
+            sect_buf_offset = value
         case (disk_io_base + 3)
-
+            track = value
         case (disk_io_base + 4)
-
+            sector = value
         case (disk_io_base + 5)
-
+            ' read
         case (disk_io_base + 6)
-    
+            ' write
     end select
 
 end sub
