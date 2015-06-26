@@ -9,6 +9,7 @@
 #include "asm.bi"
 #include "util.bi"
 #include "console.bi"
+#include "disk.bi"
 #include "bus.bi"
 #include "message.bi"
 
@@ -28,6 +29,7 @@ sub startup()
 
     bus_clear
     console_attach
+    disk_attach
 
     init_cpu    
     cli
@@ -52,9 +54,7 @@ sub cli()
 	    line input "ilxim> ", cli_cmd	
         mutexunlock console_mutex
         
-        if cli_cmd = "" then cli_cmd = last_cmd
-       
-        
+        if cli_cmd = "" then cli_cmd = last_cmd              
 
 	    arg_count = lex(cli_cmd)
 	    cmd_name = get_lexer_entry(0).strval
@@ -84,6 +84,53 @@ sub cli()
                 end if
 
                 st_save_page img_file, page_index
+            case "writesect", "ws"
+
+                dim iobase as ushort = disk_get_iobase()
+                dim page_index as integer
+                dim page_offset as integer
+                dim disk_channel as ushort
+                dim disk_track as ushort
+                dim disk_sector as ushort
+                
+                if get_lexer_entry(1).lexer_class = LC_BYTE then
+                    page_index = get_lexer_entry(1).byteval
+                else
+                    page_index = get_lexer_entry(1).intval
+                end if
+
+                if get_lexer_entry(2).lexer_class = LC_BYTE then
+                    page_offset = get_lexer_entry(2).byteval
+                else
+                    page_offset = get_lexer_entry(2).intval
+                end if
+
+                if get_lexer_entry(3).lexer_class = LC_BYTE then
+                    disk_channel = get_lexer_entry(3).byteval
+                else
+                    disk_channel = get_lexer_entry(3).intval
+                end if
+
+                if get_lexer_entry(4).lexer_class = LC_BYTE then
+                    disk_track = get_lexer_entry(4).byteval
+                else
+                    disk_track = get_lexer_entry(4).intval
+                end if
+
+                if get_lexer_entry(5).lexer_class = LC_BYTE then
+                    disk_sector = get_lexer_entry(5).byteval
+                else
+                    disk_sector = get_lexer_entry(5).intval
+                end if
+
+                disk_output iobase + 0, disk_channel
+                disk_output iobase + 1, page_index
+                disk_output iobase + 2, page_offset
+                disk_output iobase + 3, disk_track
+
+                disk_output iobase + 4, disk_sector
+               
+
             case "assemble", "a"
                 dim le_origin as lexer_entry
                 dim origin_addr as ushort

@@ -1,14 +1,21 @@
-VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o disk.o
 XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
+MKDISK_OBJS = mkdisk.o disk.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
+ 
 FBCFLAGS = -g -mt #-d STACKDEBUG -d INSTDEBUG #-d LEXDEBUG
 
-all: vm assembler rom test
+all: vm assembler diskutil rom test 
+
+diskutil: mkdisk
 
 vm: ilxim
 
 test: t_stack.bin
 
-rom: rom.bin xiasm
+rom: rom.bin diskboot.bin xiasm
+
+diskboot.bin: diskboot.xa
+	./xiasm diskboot.xa
 
 rom.bin: rom.xa
 	./xiasm rom.xa
@@ -18,14 +25,23 @@ t_stack.bin: t_stack.xa
 
 assembler: xiasm  
 
+mkdisk: $(MKDISK_OBJS)
+	fbc $(FBCFLAGS) -x mkdisk $(MKDISK_OBJS)
+
 xiasm: $(XIASM_OBJS)
 	fbc $(FBCFLAGS) -x xiasm $(XIASM_OBJS)
 
 xiasm.o: xiasm.bas
 	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
 
+mkdisk.o: mkdisk.bas
+	fbc $(FBCFLAGS) -m mkdisk -o mkdisk.o -c mkdisk.bas
+
 ilxim: $(VM_OBJS)
 	fbc $(FBCFLAGS) -x ilxim $(VM_OBJS)
+
+disk.o: disk.bas
+	fbc $(FBCFLAGS) -o disk.o -c disk.bas
 
 profile.o: profile.bas
 	fbc $(FBCFLAGS) -o profile.o -c profile.bas

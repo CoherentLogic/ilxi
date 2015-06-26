@@ -65,6 +65,9 @@
 #define OP_CMP    014
 #define OP_CMPSZ  015
 
+#define OP_CNS    016
+#define OP_CSN    017
+
 #define OP_BRANCH 020
 #define OP_BEQ	  021
 #define OP_BNE	  022

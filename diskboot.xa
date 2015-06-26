@@ -26,8 +26,8 @@ LABEL __query_disk0
     ;
 
     IN WORD %GA,240
-    CMP WORD %GA,1
-    BGE WORD {__load_boot}
+    CMP WORD %GA,0
+    BGT WORD {__load_boot}
 
     ;
     ; disk 0 is not installed. print error message and halt.
@@ -50,14 +50,13 @@ LABEL __load_boot
     ;
     ; select disk 0, track 0, sector 0
     ;
-    OUT WORD 240,0
-    OUT WORD 243,0
-    OUT WORD 244,0
+    OUT WORD 240,0                  ; channel 0
+    OUT WORD 243,0                  ; track 0
 
     ;
     ; read sector into buffer 
     ;
-    OUT WORD 245,0
+    OUT WORD 244,0                  ; sector 0
     
     ;
     ; jump to loaded code

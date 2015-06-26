@@ -6,3 +6,8 @@ bps=9600
 parity=N
 data_bits=8
 stop_bits=1
+
+[disk]
+count=2
+0=disk0.dsk
+1=disk1.dsk
