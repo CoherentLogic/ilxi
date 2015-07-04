@@ -8,10 +8,12 @@
 ' OUT
 '
 '   IOBASE   +  0:  1 = Enable Cursor; 0 = Disable Cursor
-'               1:  Set refresh sleep value (ms)
+'               1:  Set cycle sleep value (ms)
 '               2:  Set horizontal offset
 '               3:  Set vertical offset
 '               4:  Write to this port to clear video buffer
+'               5:  Refresh console
+'               6:  Copy <value> bytes from console buffer to DS:DI
 '
 ' IN
 '
@@ -19,7 +21,7 @@
 '               1:  Read refresh sleep value (ms)
 '               2:  Read horizontal offset
 '               3:  Read vertical offset
-'               4:  Nonsense!
+'               4:  Get byte count of console buffer
 
 
 #define CONSOLE_PAGE &H0001
@@ -42,9 +44,14 @@ dim shared vertical_offset as ushort = 0
 dim shared sleep_duration as ushort = 50
 dim shared cursor_enabled as ushort = 1
 
+dim shared console_input_buffer as string
+dim shared console_bytes_waiting as ushort
+
 dim shared console_file_number as integer
 
 dim shared console_io_base as ushort
+
+dim shared console_refresh as sub()
 
 declare sub console_attach()
 declare sub console_init_local()
@@ -56,3 +63,5 @@ declare sub console_cycle_local(byval userdata as any ptr)
 declare sub console_init_serial()
 declare sub console_reset_serial()
 declare sub console_cycle_serial(byval userdata as any ptr)
+declare sub console_refresh_local()
+declare sub console_refresh_serial()

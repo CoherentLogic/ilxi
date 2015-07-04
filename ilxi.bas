@@ -128,7 +128,7 @@ sub cli()
                 disk_output iobase + 2, page_offset
                 disk_output iobase + 3, disk_track
 
-                disk_output iobase + 4, disk_sector
+                disk_output iobase + 5, disk_sector
                
 
             case "assemble", "a"
