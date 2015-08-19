@@ -45,6 +45,8 @@ sub disk_init()
 
     redim installed_disks(installed_disk_count) as installed_disk_t        
 
+    message_print "disk_init():  disk adapter configured"
+
     for i = 0 to installed_disk_count - 1
         
 
@@ -62,7 +64,7 @@ sub disk_init()
 
         disk_build_seek_table i
 
-        message_print "disk_init():  channel " & trim(str(i)) & ": " & disk_header.track_count & " tracks, " & disk_header.sectors_per_track & " sectors/track (host file " & installed_disks(i).host_file & ")"
+        message_print "disk_init():  channel #" & trim(str(i)) & ": " & disk_header.track_count & " tracks, " & disk_header.sectors_per_track & " sectors/track (host file " & installed_disks(i).host_file & ")"
 
     next i
 

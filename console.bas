@@ -2,6 +2,11 @@
 ' console.bas
 '               
 
+'
+' need to redesign:
+'  I/O port should be used to read, but block waiting on single character.
+'
+
 #include "console.bi"
 #include "storage.bi"
 #include "bus.bi"
@@ -189,6 +194,7 @@ sub console_cycle_serial(byval userdata as any ptr)
         if console_bytes_waiting > 0 then
             message_print "console_cycle_serial():  reading " & console_bytes_waiting & " bytes from console"
             console_input_buffer &= input(console_bytes_waiting, console_file_number)
+            message_print "console_cycle_serial():  console buffer now " & console_input_buffer
         end if
 
 '        mutexunlock console_mutex
