@@ -12,6 +12,7 @@
 #include "disk.bi"
 #include "bus.bi"
 #include "message.bi"
+#include "help.bi"
 
 startup
 
@@ -23,7 +24,7 @@ sub startup()
     message_init
     
 
-    message_print "ILXIM Virtual Machine"
+    message_print "ILXI Virtual Machine"
     message_print " Copyright (C) 2015 Coherent Logic Development LLC"
     message_print ""
 
@@ -51,7 +52,7 @@ sub cli()
         last_cmd = cli_cmd
 
         mutexlock console_mutex
-	    line input "ilxim> ", cli_cmd	
+	    line input "ilxi> ", cli_cmd	
         mutexunlock console_mutex
         
         if cli_cmd = "" then cli_cmd = last_cmd              
@@ -264,8 +265,12 @@ sub cli()
                     cpu_clear_flag FL_TRACE
                 else
                     cpu_set_flag FL_TRACE
-                end if
-	        case "ver"
+                end If
+	       Case "?"
+		  print help_get_topic("ilxi.xmf", "index")
+	       case "help"
+		  print help_get_topic("ilxi.xmf", get_lexer_entry(1).strval)
+	       case "ver"
 	       	    print "ILXI 0.1"
 	        case "run"
                 if cpu_get_flag(FL_HALT) = 0 then
@@ -276,7 +281,7 @@ sub cli()
                 end if
 	        case "reset"
 	            init_cpu	            
-            case "exit"
+            case "exit", "quit"
                 end
 	        case else
 	       	    message_print "cli():  invalid command '" & cmd_name & "'"

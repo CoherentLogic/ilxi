@@ -11,9 +11,7 @@
 '               1:  Set cycle sleep value (ms)
 '               2:  Set horizontal offset
 '               3:  Set vertical offset
-'               4:  Write to this port to clear video buffer
-'               5:  Refresh console
-'               6:  Copy <value> bytes from console buffer to DS:DI
+'               4:  Fill video buffer
 '
 ' IN
 '
@@ -21,8 +19,8 @@
 '               1:  Read refresh sleep value (ms)
 '               2:  Read horizontal offset
 '               3:  Read vertical offset
-'               4:  Get byte count of console buffer
-
+'		4:  Read one character from console
+'
 
 #define CONSOLE_PAGE &H0001
 #define CONSOLE_OFFSET &H0000
@@ -43,9 +41,6 @@ dim shared horizontal_offset as ushort = 0
 dim shared vertical_offset as ushort = 0
 dim shared sleep_duration as ushort = 50
 dim shared cursor_enabled as ushort = 1
-
-dim shared console_input_buffer as string
-dim shared console_bytes_waiting as ushort
 
 dim shared console_file_number as integer
 

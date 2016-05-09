@@ -36,7 +36,7 @@ sub console_attach()
 
             console_refresh = @console_refresh_local
             
-            message_print "console_attach():  local console"
+            message_print "console_attach():  local console configured at I/O port " & console_device.io_base & "h"
 
         case "serial"
 
@@ -59,7 +59,7 @@ sub console_attach()
             console_data_bits = config_get("console", "data_bits")
             console_stop_bits = config_get("console", "stop_bits")
 
-            message_print "console_attach():  serial console at " & console_port & ":  (" & console_bps & " " & console_parity & console_data_bits & console_stop_bits & ")"
+            message_print "console_attach():  serial console configured at I/O port " & console_device.io_base & "h (host device " & console_port & "):  (" & console_bps & " " & console_parity & console_data_bits & console_stop_bits & ")"
 
     end select	
     
@@ -111,8 +111,8 @@ function console_input(port_number as ushort) as ushort
             return horizontal_offset
         case (console_io_base + 3)
             return vertical_offset
-        case (console_io_base + 4)
-            return len(console_input_buffer)
+	case (console_io_base + 4)
+	     	     		    
         case else
             return 0
     end select
@@ -147,26 +147,8 @@ sub console_output(port_number as ushort, value as ushort)
         case (console_io_base + 4)
 
     	    for i = CONSOLE_OFFSET to CONSOLE_LIMIT - 1
-                st_write_byte CONSOLE_PAGE, i, 0
+                st_write_byte CONSOLE_PAGE, i, value
             next i
-
-        case (console_io_base + 5)
-    
-            console_refresh()
-
-        case (console_io_base + 6)
-
-            mutexlock console_mutex
-
-            for i = 1 to value
-                st_write_byte cpu_state.ds, cpu_state.di, asc(mid(console_input_buffer, i, 1))
-
-                cpu_state.di += 1
-            next i
-
-            console_input_buffer = mid(console_input_buffer, value + 1)            
-       
-            mutexunlock console_mutex
 
     end select
 
@@ -176,7 +158,9 @@ sub console_cycle_local(byval userdata as any ptr)
     
 
     do
-	    sleep sleep_duration, 1
+	sleep sleep_duration, 1
+
+	console_refresh_local
 
         if bus_get_stop_flag(0) = 1 then exit do
     loop
@@ -187,19 +171,9 @@ sub console_cycle_serial(byval userdata as any ptr)
 
 
     do
-'        mutexlock console_mutex
+	sleep sleep_duration, 1
 
-        console_bytes_waiting = loc(console_file_number)
-
-        if console_bytes_waiting > 0 then
-            message_print "console_cycle_serial():  reading " & console_bytes_waiting & " bytes from console"
-            console_input_buffer &= input(console_bytes_waiting, console_file_number)
-            message_print "console_cycle_serial():  console buffer now " & console_input_buffer
-        end if
-
-'        mutexunlock console_mutex
-
-	    sleep sleep_duration, 1
+	console_refresh_serial
 
         if bus_get_stop_flag(0) = 1 then exit do
     loop

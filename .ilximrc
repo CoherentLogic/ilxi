@@ -8,6 +8,14 @@ data_bits=8
 stop_bits=1
 
 [disk]
-count=2
+count=10
 0=disk0.dsk
 1=disk1.dsk
+2=disk2.dsk
+3=disk3.dsk
+4=disk4.dsk
+5=disk5.dsk
+6=disk6.dsk
+7=disk7.dsk
+8=disk8.dsk
+9=disk9.dsk

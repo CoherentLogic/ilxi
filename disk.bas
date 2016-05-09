@@ -45,7 +45,8 @@ sub disk_init()
 
     redim installed_disks(installed_disk_count) as installed_disk_t        
 
-    message_print "disk_init():  disk adapter configured"
+    message_print "disk_init():  disk adapter configured at I/O port " & disk_io_base & "h"
+    message_print "disk_init():  " & installed_disk_count & " storage devices attached"
 
     for i = 0 to installed_disk_count - 1
         

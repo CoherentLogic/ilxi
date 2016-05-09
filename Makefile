@@ -1,14 +1,15 @@
-VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o disk.o
+VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o disk.o help.o
 XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
 MKDISK_OBJS = mkdisk.o disk.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
  
 FBCFLAGS = -g -mt #-d STACKDEBUG -d INSTDEBUG #-d LEXDEBUG
 
+
 all: vm assembler diskutil rom test 
 
 diskutil: mkdisk
 
-vm: ilxim
+vm: ilxi
 
 test: t_stack.bin
 
@@ -37,8 +38,11 @@ xiasm.o: xiasm.bas
 mkdisk.o: mkdisk.bas
 	fbc $(FBCFLAGS) -m mkdisk -o mkdisk.o -c mkdisk.bas
 
-ilxim: $(VM_OBJS)
-	fbc $(FBCFLAGS) -x ilxim $(VM_OBJS)
+ilxi: $(VM_OBJS)
+	fbc $(FBCFLAGS) -x ilxi $(VM_OBJS)
+
+help.o: help.bas
+	fbc $(FBCFLAGS) -o help.o -c help.bas
 
 disk.o: disk.bas
 	fbc $(FBCFLAGS) -o disk.o -c disk.bas
@@ -89,4 +93,4 @@ message.o: message.bas
 	fbc $(FBCFLAGS) -o message.o -c message.bas
 
 clean:
-	rm -f *.o ilxim xiasm rom.bin t_stack.bin
+	rm -f *.o ilxi xiasm rom.bin t_stack.bin mkdisk diskboot.bin
