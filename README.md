@@ -85,6 +85,98 @@ Instructions (ICALL, SCALL, and LCALL) are provided for calling subroutines.
 The RET family of instructions (IRET, SRET, and LRET) are provided to clean
 up the stack and return.
 
+##Addressing Modes
+
+###Immediate
+
+###Register-Direct
+
+###Memory-Direct
+
+###Register-Direct + Displacement
+
+###Memory-Direct + Displacement
+
+###Register-Indirect
+
+###Memory-Indirect
+
+###Register-Indirect + Displacement
+
+###Memory-Indirect + Displacement
+
+##Instruction Set
+
+###COPY
+
+###CPSZ
+
+###ADD
+
+###SUB
+
+###MUL
+
+###DIV
+
+###SHL
+
+###SHR
+
+###OR
+
+###NOT
+
+###AND
+
+###XOR
+
+###EQV
+
+###CMP
+
+###CMPSZ
+
+###CNS
+
+###CSN
+
+###BRANCH
+
+###BEQ
+
+###BNE
+
+###BZ
+
+###BLT
+
+###BGT
+
+###SCALL
+
+###LCALL
+
+###ICALL
+
+###SRET
+
+###LRET
+
+###IRET
+
+###PUSH
+
+###POP
+
+###IN
+
+###OUT
+
+###NOP
+
+###HLT
+
 
 ##ILXI Interactive Commands
 
