@@ -84,30 +84,32 @@ incremented.
 Instructions (ICALL, SCALL, and LCALL) are 
 
 
-ILXI Interactive Commands
+##ILXI Interactive Commands
 
-loadpage, lp - load memory segment from host file
-savepage, sp    - save memory segment to host file
-writesect, ws   - write sector to disk
-assemble, a     - interactively assemble instructions to a memory segment
-disassemble, di - disassemble instructions in memory
-step            - single-step through a program
-pushb		- push a byte to the stack
-pushw		- push a word to the stack
-getm		- dump memory segments to the screen
-setm		- set the value of bytes or words in memory
-getr		- get the value of a CPU register
-setr		- set the value of a CPU register
-dumpcpu, d	- display the current state of CPU registers
-trace	 	- toggles instruction tracing
-ver		- display the current version of ILXI
-run		- run the CPU
-reset		- re-initialize the CPU
-help		- display online help topics
-?		- display this list of ILXI operations
-exit, quit	- exit ILXI
+| Command | Description |
+| --- | --- |
+| loadpage, lp | Load memory segment from host file |
+| savepage, sp | Save memory segment to host file |
+| writesect, ws | Write sector to disk |
+| assemble, a | Interactively assemble instructions to a memory segment |
+| disassemble, di | Disassemble instructions in memory |
+| step | Single-step through a program |
+| pushb	| Push a BYTE value onto the stack |
+| pushw	| Push a WORD value onto the stack |
+| getm | Dump memory segments to the screen |
+| setm | Set the value of bytes or words in memory |
+| getr | Get the value of a CPU register |
+| setr | Set the value of a CPU register |
+| dumpcpu, d | Display the current state of CPU registers and flags |
+| trace | Toggles instruction tracing on and off |
+| ver | Display the current version of ILXI |
+| run | Run the CPU |
+| reset | Re-initialize the CPU |
+| help | Display online help topics |
+| ?	| Display a list of ILXI operations |
+| exit, quit | exit ILXI |
 
-@loadpage
+###loadpage, lp
 loadpage - Load a memory segment from host file
 
 Syntax:  [loadpage|lp] <host-file> <segment-number>
@@ -117,9 +119,8 @@ Details:
 loadpage loads a single 64Kb segment from a memory image file
 on the host machine. This can be a program, assembled with
 the xiasm assembler, or generated from other ILXI compilers.
-@lp
-lp - see help for "loadpage"
-@savepage
+
+###savepage, sp
 savepage - Save a memory segment to host file
 
 Syntax:  [savepage|sp] <host-file> <segment-index>
@@ -130,9 +131,8 @@ savepage saves a single 64Kb segment from ilxi into the specified
 memory image file on the host. When used with the assemble command,
 this allows the user to use ILXI as an interactive program development
 environment.
-@sp
-sp - see help for "savepage"
-@writesect
+
+###writesect, ws
 writesect - Write to one sector of an attached disk
 
 Syntax: [writesect|ws] <segment-number> <offset> <channel> <track> <sector>
@@ -140,9 +140,8 @@ Syntax: [writesect|ws] <segment-number> <offset> <channel> <track> <sector>
 Details:
 
 writesect writes data from segment-number:offset to the specified disk sector.
-@ws
-ws - see help for "writesect"
-@assemble
+
+###assemble
 assemble - interactively assemble instructions directly into memory
 
 Syntax: assemble <origin>
@@ -151,7 +150,8 @@ Details:
 
 assemble allows you to interactively assemble instructions into ILXI memory.
 The starting address is EP:<origin>, where EP is the CPU's EP register.
-@disassemble
+
+###disassemble, di
 disassemble - disassemble instructions in memory
 
 Syntax: [disassemble|di] <starting-offset> <instruction-count>
@@ -160,9 +160,8 @@ Details:
 
 disassemble will convert <instruction-count> instructions of machine code 
 starting at CP:<starting-offset>
-@di
-di - see help for "disassemble"
-@step
+
+###step
 step - single-step through program instructions
 
 Syntax: step
@@ -170,7 +169,8 @@ Syntax: step
 Details:
 
 step will advance the program counter register and execute the next instruction.
-@getr
+
+###getr
 getr - get the value of a CPU register
 
 Syntax: getr <register-name>
@@ -178,7 +178,8 @@ Syntax: getr <register-name>
 Details:
 
 getr will return the value contained in the CPU register denoted by <register-name>
-@setr
+
+###setr
 setr - set the value of a CPU register
 
 Syntax: setr <register-name> <value>
@@ -186,7 +187,8 @@ Syntax: setr <register-name> <value>
 Details:
 
 setr will set the CPU register denoted by <register-name> to <value>
-@pushb
+
+###pushb
 pushb - push a BYTE value onto the stack
 
 Syntax: pushb <byte-value>
@@ -195,7 +197,8 @@ Details:
 
 pushb will push <byte-value> onto the stack, and update CPU registers
 accordingly.
-@pushw
+
+###pushw
 pushw - push a WORD value onto the stack
 
 Syntax: pushw <word-value>
@@ -204,7 +207,8 @@ Details:
 
 pushw will push <word-value> onto the stack, and update CPU registers
 accordingly.
-@getm
+
+###getm
 getm - dump memory contents to screen
 
 Syntax: getm <start-offset> <end-offset>
@@ -213,7 +217,8 @@ Details:
 
 getm will display the contents of memory from DP:<start-offset> to
 DP:<end-offset> on the screen.
-@setm
+
+###setm
 setm - set the value of bytes or words in memory
 
 Syntax: setm <offset> <value>
@@ -222,7 +227,8 @@ Details:
 
 setm will write <value> to memory address DP:<offset>.
 The <value> can be either a BYTE or a WORD.
-@dumpcpu
+
+###dumpcpu, d
 dumpcpu - displays the state of CPU registers
 
 Syntax: [dumpcpu|d]
@@ -231,9 +237,8 @@ Details:
 
 The dumpcpu command will display the current contents of
 all CPU registers and flags.
-@d
-See help for "dumpcpu"
-@trace
+
+###trace
 trace - toggle program trace
 
 Syntax: trace <value>
@@ -245,7 +250,8 @@ either 1 or 0, where 1 turns tracing on and 0 turns tracing off.
 
 In program trace mode, the CPU will halt after each instruction,
 something like an automated single-step.
-@ver
+
+### ver
 ver - display the current version of ILXI
 
 Syntax:  ver
@@ -253,7 +259,8 @@ Syntax:  ver
 Details:
 
 Displays the current version of ILXI.
-@run
+
+###run
 run - run the CPU
 
 Syntax:  run
@@ -261,7 +268,8 @@ Syntax:  run
 Details:
 
 The "run" command will start the CPU running at address CP:PC
-@reset
+
+###reset
 reset - re-initialize the CPU
 
 Syntax:  reset
@@ -274,7 +282,8 @@ the bus initialized, and signals initialized.
 
 This command must be used in order to perform single-step operations
 on a program after a program-generated HALT is encountered.
-@help
+
+###help
 help - display online help
 
 Syntax:  help <topic>
@@ -282,7 +291,8 @@ Syntax:  help <topic>
 Details:
 
 Displays online help topic <topic> on the screen.
-@?
+
+###?
 ? - display list of help topics
 
 Syntax:  ?
@@ -290,7 +300,8 @@ Syntax:  ?
 Details:
 
 Displays a list of available help topics
-@exit
+
+###exit, quit
 exit - exit the ILXI environment
 
 Syntax:  exit
@@ -298,86 +309,12 @@ Syntax:  exit
 Details:
 
 Exits the ILXI environment.
-@quit
-See help for "exit"
-@registers
-ILXI CPU Registers
 
-0        8        16
-+-----------------+
-|        PC       |  PROGRAM COUNTER
-+-----------------+
-|        EC       |  ERROR CODE
-+-----------------+
-|        ES       |  ERROR SEVERITY
-+-----------------+
-|        FL       |  FLAGS
-+-----------------+
-|        CP       |  CODE PAGE
-+-----------------+
-|        DP       |  DATA PAGE
-+-----------------+
-|        EP       |  EXTRA PAGE
-+-----------------+
-|        SP       |  STACK PAGE
-+-----------------+
-|        SO       |  STACK OFFSET
-+-----------------+
-|        SS       |  SOURCE PAGE
-+-----------------+
-|        DS       |  DESTINATION PAGE
-+-----------------+
-|        SI       |  SOURCE INDEX
-+-----------------+
-|        DI       |  DESTINATION INDEX
-+-----------------+
-|        BP       |  BASE POINTER
-+--------+--------+
-|   LA   |   HA   |  GENERAL A
-|        GA       | 
-+--------+--------+
-|   LB   |   HB   |  GENERAL B
-|        GB       | 
-+--------+--------+
-|   LC   |   HC   |  GENERAL C
-|        GC       | 
-+--------+--------+
-|   LD   |   HD   |  GENERAL D
-|        GD       | 
-+--------+--------+
-|   LE   |   HE   |  GENERAL E
-|        GE       | 
-+-----------------+
-|        GF       |  GENERAL F
-+-----------------+
-|        GG       |  GENERAL G
-+-----------------+
-|        GH       |  GENERAL H
-+-----------------+
-|        GI       |  GENERAL I
-+-----------------+
-|        GJ       |  GENERAL J
-+-----------------+
-|        GK       |  GENERAL K
-+-----------------+
-|        GL       |  GENERAL L
-+-----------------+
-|        GM       |  GENERAL M
-+-----------------+
-|        GN       |  GENERAL N
-+-----------------+
-|        GO       |  GENERAL O
-+-----------------+
-|        GP       |  GENERAL P
-+-----------------+
-@clear
+###clear, cls
 clear - clear the screen
 
-Syntax:  clear
+Syntax:  [clear|cls]
 
 Details:
 
 Clears the ILXI screen.
-@cls
-See help for "clear"
-
