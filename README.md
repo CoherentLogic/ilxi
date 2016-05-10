@@ -13,8 +13,9 @@ The ILXI memory model consists of non-overlapping, 64Kb pages. Up to
 
 The maximum amount of memory accessible in ILXI is 4096MB.
 
-Addresses are in the form of <page>:<offset>, where <page> is typically 
-one of the page registers CP, DP, EP, or SP.
+Addresses are in the form of page:offset, where page is typically 
+one of the page registers CP, DP, EP, or SP, and offset is the number of
+bytes from the beginning of the page by which the address is offset.
 
 ###Data Types
 
@@ -47,7 +48,7 @@ EC (Error Code), ES (Error Severity), and FL (Flags).
 ###Flags
 
 The FL register is used to represent the present status of thirteen
-distinct flags. They are summarized as follows
+distinct flags. They are summarized as follows:
 
 
 | Flag | Size (bits) | Meaning |
