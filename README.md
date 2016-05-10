@@ -90,15 +90,15 @@ up the stack and return.
 
 | Command | Description |
 | --- | --- |
-| loadpage, lp | Load memory segment from host file |
-| savepage, sp | Save memory segment to host file |
+| loadpage, lp | Load memory page from host file |
+| savepage, sp | Save memory page to host file |
 | writesect, ws | Write sector to disk |
-| assemble, a | Interactively assemble instructions to a memory segment |
+| assemble, a | Interactively assemble instructions to a memory page |
 | disassemble, di | Disassemble instructions in memory |
 | step | Single-step through a program |
 | pushb	| Push a BYTE value onto the stack |
 | pushw	| Push a WORD value onto the stack |
-| getm | Dump memory segments to the screen |
+| getm | Dump memory pages to the screen |
 | setm | Set the value of bytes or words in memory |
 | getr | Get the value of a CPU register |
 | setr | Set the value of a CPU register |
@@ -112,24 +112,24 @@ up the stack and return.
 | exit, quit | exit ILXI |
 
 ###loadpage, lp
-loadpage - Load a memory segment from host file
+loadpage - Load a memory page from host file
 
-Syntax:  [loadpage|lp] \<host-file\> \<segment-number\>
+Syntax:  [loadpage|lp] \<host-file\> \<page-number\>
 
 Details:
 
-loadpage loads a single 64Kb segment from a memory image file
+loadpage loads a single 64Kb page from a memory image file
 on the host machine. This can be a program, assembled with
 the xiasm assembler, or generated from other ILXI compilers.
 
 ###savepage, sp
-savepage - Save a memory segment to host file
+savepage - Save a memory page to host file
 
-Syntax:  [savepage|sp] \<host-file\> \<segment-index\>
+Syntax:  [savepage|sp] \<host-file\> \<page-index\>
 
 Details:
 
-savepage saves a single 64Kb segment from ilxi into the specified
+savepage saves a single 64Kb page from ilxi into the specified
 memory image file on the host. When used with the assemble command,
 this allows the user to use ILXI as an interactive program development
 environment.
@@ -137,11 +137,11 @@ environment.
 ###writesect, ws
 writesect - Write to one sector of an attached disk
 
-Syntax: [writesect|ws] \<segment-number\> \<offset\> \<channel\> \<track\> \<sector\>
+Syntax: [writesect|ws] \<page-number\> \<offset\> \<channel\> \<track\> \<sector\>
 
 Details:
 
-writesect writes data from segment-number:offset to the specified disk sector.
+writesect writes data from \<page-number\>:\<offset\> to the specified disk sector.
 
 ###assemble
 assemble - interactively assemble instructions directly into memory
