@@ -1,0 +1,68 @@
+;
+;  ILXI eXtended Operating System - XOS 
+;   Version 0.1
+;   
+;   Copyright (C) 2016 Coherent Logic Development
+;
+;   kernel.xa - kernel routines
+;
+    PROGRAM TITLE 'XOS'
+    ORIGIN 0
+
+    EQU PG_SYS 0                ; system code page
+    EQU PG_VID 1                ; video buffer page
+    EQU PG_DAT 0                ; system data page
+    EQU PG_DTA 2                ; disk transfer area
+    EQU PG_STK 10               ; stack page
+    
+    BRANCH WORD {__BOOT}        ; skip decls, branch to __BOOT
+
+    VAR WORD CON_PTR 1          ; console pointer
+    VAR ZSTRING BOOTMSG "ILXI XOS 0.1"
+
+;****
+; CONSOLE_INIT
+;  Initialize the XOS console
+;
+LABEL CONSOLE_INIT              
+    OUT 0,1                     ; enable cursor
+    OUT 1,25                    ; set console cycle to 25ms
+    OUT 2,0                     ; no horizontal offset
+    OUT 3,0                     ; no vertical offset
+    COPY WORD (#{CON_PTR}),1    ; initialize console pointer
+    SRET
+
+;****
+; CONSOLE_PRINT
+;  Print string pointed to by SS:SI 
+;
+LABEL CONSOLE_PRINT
+    PUSH WORD %BP               ; preserve BP
+    COPY WORD %BP,%SO           ; copy stack offset to base ptr
+
+    PUSH WORD %SS               ; preserve SS
+    PUSH WORD %DS               ; preserve DS
+    PUSH WORD %DI               ; preserve DI
+    
+    COPY WORD %DS,{PG_VID}      ; destination page = video page
+    COPY WORD %DI,#{CON_PTR}    ; destination offset = CON_PTR
+
+    CPSZ                        ; copy SS:SI to video buffer
+
+    ADD WORD (#{CON_PTR}),%DI   ; update console pointer
+    
+    POP WORD %DI                ; restore DI
+    POP WORD %DS                ; restore DS
+    POP WORD %SS                ; restore SS
+    POP WORD %BP                ; restore BP
+
+    SRET
+    
+LABEL __BOOT
+    COPY WORD %DP,{PG_DAT}      ; initialize data page
+    COPY WORD %SP,{PG_STK}      ; initialize stack page
+    
+    COPY WORD %SS,%DP           ; point SS:SI to BOOTMSG
+    COPY WORD %SI,{BOOTMSG}
+    SCALL WORD {CONSOLE_PRINT}  ; call print routine
+

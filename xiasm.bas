@@ -42,7 +42,7 @@ sub do_asm(filename as string, argi as integer)
 
     if udidx > 0 then       ' we have a need for a fix-up pass
 
-        'print ">>> PASS 2 [INFO]:   Attempting to resolve "; trim(str(udidx)); " symbol(s) left over from pass 1"
+        print ">>> PASS 2 [INFO]:   Attempting to resolve "; trim(str(udidx)); " symbol(s) left over from pass 1"
 
         dim i as integer
         dim e as undef_entry
@@ -61,7 +61,7 @@ sub do_asm(filename as string, argi as integer)
                 print "FATAL UNRESOLVED SYMBOL "; e.e_key
                 end
             else
-                'print ">>> PASS 2 [INFO]:   Resolved symbol "; e.e_key; " (symbol found at offset "; hex(f.offset); "h, inserted at fix-up offset "; hex(fixup_offset); "h)"
+                print ">>> PASS 2 [INFO]:   Resolved symbol "; e.e_key; " (symbol found at offset "; hex(f.offset); "h, inserted at fix-up offset "; hex(fixup_offset); "h)"
                 st_write_word argi, fixup_offset, f.offset
             end if   
                                                
@@ -146,7 +146,7 @@ sub initial_pass(page_number as ushort)
                 else
                     asm_offset = get_lexer_entry(1).intval
                 end if          
-                'print ">>> PASS 1 [INFO]:   Program ORIGIN set to offset "; hex(asm_offset)
+                print ">>> PASS 1 [INFO]:   Program ORIGIN set to offset "; hex(asm_offset)
 				origin = asm_offset
             case "EQU"
                 t_sym.e_key = get_lexer_entry(1).strval
@@ -205,7 +205,7 @@ sub initial_pass(page_number as ushort)
                 fixup_flag = 0
 	            ts = expand_macros(input_lines(i))
 	
-	            'print ">>> PASS 1 [OUTPUT]: "; ilxi_pad_left(hex(asm_offset), "0", 4); ":  "; ts
+	            print ">>> PASS 1 [OUTPUT]: "; ilxi_pad_left(hex(asm_offset), "0", 4); ":  "; ts
 	
 	            asm_assemble ts
                 asm_offset += 1
@@ -301,7 +301,7 @@ function expand_macros(input_string as string) as string
                         ' resolution until next pass if not resolved
                         '
                         if symbol.resolved = 0 then
-                            'print ">>> PASS 1 [INFO]:   Deferring resolution of '"; macro_name; "' until next pass"
+                            print ">>> PASS 1 [INFO]:   Deferring resolution of '"; macro_name; "' until next pass"
                             
                             dim uent as undef_entry
                         
