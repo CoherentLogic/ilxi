@@ -50,21 +50,21 @@ The FL register is used to represent the present status of thirteen
 distinct flags. They are summarized as follows
 
 
-Flag|Size (bits)|Meaning
--|-|-
-HF|1|HALT
-TF|1|TRACE
-OF|1|OVERFLOW
-CF|1|CARRY
-IF|1|INTERRUPT ENABLE
-EF|1|EQUALITY
-LF|1|LESS THAN
-GF|1|GREATER THAN
-ZF|1|ZERO
-PL|2|PRIVILEGE LEVEL
-PF|1|PARITY
-SF|1|SIGN
-DF|1|DEBUG
+| Flag | Size (bits) | Meaning |
+| --- | --- | --- |
+| HF | 1 | HALT |
+| TF | 1 | TRACE |
+| OF | 1 | OVERFLOW |
+| CF | 1 | CARRY |
+| IF | 1 | INTERRUPT ENABLE |
+| EF | 1 | EQUALITY |
+| LF | 1 | LESS THAN |
+| GF | 1 | GREATER THAN |
+| ZF | 1 | ZERO |
+| PL | 2 | PRIVILEGE LEVEL |
+| PF | 1 | PARITY |
+| SF | 1 | SIGN |
+| DF | 1 | DEBUG |
 
 
 ###Stack
