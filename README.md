@@ -26,7 +26,7 @@ registers employ big-endian byte ordering, as does main memory.
 ###Registers
 
 The CPU exposes sixteen general-purpose WORD registers, GA through GP. 
-The first five of these registers can also be accessed as ten eight-bit 
+The first five of these registers can also be accessed as ten BYTE 
 registers, LA through LE, and HA through HE, where Lx and Hx represent
 the low-order and high-order bytes of the corresponding Gx register, 
 respectively.
