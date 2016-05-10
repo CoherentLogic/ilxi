@@ -71,7 +71,7 @@ distinct flags. They are summarized as follows:
 ###Stack
 
 An ILXI program may define a stack at any memory page the user wishes.
-This page is specified in the SP register, and the current stack position
+This page is specified in the SP register, and the current stack position.
 The stack grows downward from the top of this page, with the current
 position specified in the SO (Stack Offset) register.
 
