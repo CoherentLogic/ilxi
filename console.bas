@@ -2,11 +2,6 @@
 ' console.bas
 '               
 
-'
-' need to redesign:
-'  I/O port should be used to read, but block waiting on single character.
-'
-
 #include "console.bi"
 #include "storage.bi"
 #include "bus.bi"
@@ -30,7 +25,7 @@ sub console_attach()
 	            .dev_init = @console_init_local
 	            .dev_reset = @console_reset_local
 	            .dev_cycle = @console_cycle_local
-	            .dev_input = @console_input
+	            .dev_input = @console_input_local
 	            .dev_output = @console_output
 	        end with        
 
@@ -47,7 +42,7 @@ sub console_attach()
                 .dev_init = @console_init_serial
                 .dev_reset = @console_reset_serial
                 .dev_cycle = @console_cycle_serial
-                .dev_input = @console_input
+                .dev_input = @console_input_serial
                 .dev_output = @console_output
             end with
 
@@ -66,11 +61,11 @@ sub console_attach()
 
     bus_attach 0, console_device
 
-end sub
+end sub ' console_attach()
 
 sub console_init_local()
     console_mutex = mutexcreate()
-end sub
+end sub ' console_init_local()
 
 sub console_init_serial()
     console_mutex = mutexcreate()
@@ -90,17 +85,17 @@ sub console_init_serial()
 
     print #console_file_number, chr(27) & "[2J"
 
-end sub
+end sub ' console_init_serial()
 
 sub console_reset_local()
 
-end sub
+end sub ' console_reset_local()
 
 sub console_reset_serial()
 
-end sub
+end sub ' console_reset_serial()
 
-function console_input(port_number as ushort) as ushort
+function console_input_local(port_number as ushort) as ushort
 
     select case port_number
         case (console_io_base + 0)
@@ -111,13 +106,34 @@ function console_input(port_number as ushort) as ushort
             return horizontal_offset
         case (console_io_base + 3)
             return vertical_offset
-	case (console_io_base + 4)
-	     	     		    
+		case (console_io_base + 4)
+			console_refresh_local
+			return asc(input(1))
         case else
             return 0
     end select
     
-end function
+end function ' console_input_local()
+
+function console_input_serial(port_number as ushort) as ushort
+
+    select case port_number
+        case (console_io_base + 0)
+            return cursor_enabled
+        case (console_io_base + 1)
+            return sleep_duration
+        case (console_io_base + 2)
+            return horizontal_offset
+        case (console_io_base + 3)
+            return vertical_offset
+		case (console_io_base + 4)
+			return asc(input(1, console_file_number))
+        case else
+            return 0
+    end select
+    
+end function ' console_input_serial()
+
 
 sub console_output(port_number as ushort, value as ushort)
 
@@ -152,7 +168,7 @@ sub console_output(port_number as ushort, value as ushort)
 
     end select
 
-end sub
+end sub ' console_output()
 
 sub console_cycle_local(byval userdata as any ptr)
     

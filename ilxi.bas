@@ -266,11 +266,11 @@ sub cli()
                 else
                     cpu_set_flag FL_TRACE
                 end If
-	       Case "?"
-		  print help_get_topic("ilxi.xmf", "index")
-	       case "help"
-		  print help_get_topic("ilxi.xmf", get_lexer_entry(1).strval)
-	       case "ver"
+			case "?"
+				print help_get_topic("ilxi.xmf", "index")
+			case "help"
+				print help_get_topic("ilxi.xmf", get_lexer_entry(1).strval)
+			case "ver"
 	       	    print "ILXI 0.1"
 	        case "run"
                 if cpu_get_flag(FL_HALT) = 0 then
@@ -279,6 +279,8 @@ sub cli()
                 else
                     message_print "cli():  CPU is halted. Type 'reset' at the prompt before attempting 'run'."
                 end if
+	        case "clear", "cls"
+				cls
 	        case "reset"
 	            init_cpu	            
             case "exit", "quit"

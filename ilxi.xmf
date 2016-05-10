@@ -111,9 +111,9 @@ Details:
 pushb will push <byte-value> onto the stack, and update CPU registers
 accordingly.
 @pushw
-pushb - push a WORD value onto the stack
+pushw - push a WORD value onto the stack
 
-Syntax: pushb <word-value>
+Syntax: pushw <word-value>
 
 Details:
 
@@ -215,4 +215,83 @@ Details:
 Exits the ILXI environment.
 @quit
 See help for "exit"
+@registers
+ILXI CPU Registers
 
+0        8        16
++-----------------+
+|        PC       |  PROGRAM COUNTER
++-----------------+
+|        EC       |  ERROR CODE
++-----------------+
+|        ES       |  ERROR SEVERITY
++-----------------+
+|        FL       |  FLAGS
++-----------------+
+|        CP       |  CODE PAGE
++-----------------+
+|        DP       |  DATA PAGE
++-----------------+
+|        EP       |  EXTRA PAGE
++-----------------+
+|        SP       |  STACK PAGE
++-----------------+
+|        SO       |  STACK OFFSET
++-----------------+
+|        SS       |  SOURCE PAGE
++-----------------+
+|        DS       |  DESTINATION PAGE
++-----------------+
+|        SI       |  SOURCE INDEX
++-----------------+
+|        DI       |  DESTINATION INDEX
++-----------------+
+|        BP       |  BASE POINTER
++--------+--------+
+|   LA   |   HA   |  GENERAL A
+|        GA       | 
++--------+--------+
+|   LB   |   HB   |  GENERAL B
+|        GB       | 
++--------+--------+
+|   LC   |   HC   |  GENERAL C
+|        GC       | 
++--------+--------+
+|   LD   |   HD   |  GENERAL D
+|        GD       | 
++--------+--------+
+|   LE   |   HE   |  GENERAL E
+|        GE       | 
++-----------------+
+|        GF       |  GENERAL F
++-----------------+
+|        GG       |  GENERAL G
++-----------------+
+|        GH       |  GENERAL H
++-----------------+
+|        GI       |  GENERAL I
++-----------------+
+|        GJ       |  GENERAL J
++-----------------+
+|        GK       |  GENERAL K
++-----------------+
+|        GL       |  GENERAL L
++-----------------+
+|        GM       |  GENERAL M
++-----------------+
+|        GN       |  GENERAL N
++-----------------+
+|        GO       |  GENERAL O
++-----------------+
+|        GP       |  GENERAL P
++-----------------+
+@clear
+clear - clear the screen
+
+Syntax:  clear
+
+Details:
+
+Clears the ILXI screen.
+@cls
+See help for "clear"

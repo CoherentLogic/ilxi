@@ -1,6 +1,4 @@
-'
-' console.bi
-'
+
 
 '
 ' I/O PORT USAGE
@@ -19,7 +17,7 @@
 '               1:  Read refresh sleep value (ms)
 '               2:  Read horizontal offset
 '               3:  Read vertical offset
-'		4:  Read one character from console
+'				4:  Read one character from console
 '
 
 #define CONSOLE_PAGE &H0001
@@ -51,7 +49,8 @@ dim shared console_refresh as sub()
 declare sub console_attach()
 declare sub console_init_local()
 declare sub console_reset_local()
-declare function console_input(port_number as ushort) as ushort
+declare function console_input_local(port_number as ushort) as ushort
+declare function console_input_serial(port_number as ushort) as ushort
 declare sub console_output(port_number as ushort, value as ushort)
 declare sub console_cycle_local(byval userdata as any ptr)
 

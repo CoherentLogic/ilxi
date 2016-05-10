@@ -1,6 +1,6 @@
 
 [console]
-mode=serial
+mode=local
 port=/dev/modem
 bps=9600
 parity=N

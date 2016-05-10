@@ -21,6 +21,10 @@ sub main(args as string)
 
     arg_count = lex(args)
 
+	print "ILXI EXTERNAL ASSEMBLER V0.02    (C) COHERENT LOGIC DEVELOPMENT 2016"
+	print ""
+	print ""
+
     for argi = 0 to arg_count - 1
         do_asm get_lexer_entry(argi).strval, argi
     next argi
@@ -38,7 +42,7 @@ sub do_asm(filename as string, argi as integer)
 
     if udidx > 0 then       ' we have a need for a fix-up pass
 
-        print ">>> PASS 2 [INFO]:   Attempting to resolve "; trim(str(udidx)); " symbol(s) left over from pass 1"
+        'print ">>> PASS 2 [INFO]:   Attempting to resolve "; trim(str(udidx)); " symbol(s) left over from pass 1"
 
         dim i as integer
         dim e as undef_entry
@@ -54,10 +58,10 @@ sub do_asm(filename as string, argi as integer)
             f = lookup_symbol(e.e_key)
 
             if f.resolved = 0 then
-                print ">>> PASS 2 [FATAL]: Unresolved symbol "; e.e_key
+                print "FATAL UNRESOLVED SYMBOL "; e.e_key
                 end
             else
-                print ">>> PASS 2 [INFO]:   Resolved symbol "; e.e_key; " (symbol found at offset "; hex(f.offset); "h, inserted at fix-up offset "; hex(fixup_offset); "h)"
+                'print ">>> PASS 2 [INFO]:   Resolved symbol "; e.e_key; " (symbol found at offset "; hex(f.offset); "h, inserted at fix-up offset "; hex(fixup_offset); "h)"
                 st_write_word argi, fixup_offset, f.offset
             end if   
                                                
@@ -69,7 +73,7 @@ sub do_asm(filename as string, argi as integer)
 
     st_save_page output_file_name, argi
 
-    print ">>> FILE OUTPUT [INFO]:  Produced "; output_file_name; " from "; filename
+    print "GENERATED "; ucase(output_file_name); " FROM "; ucase(filename)
 
 end sub
 
@@ -120,7 +124,9 @@ sub initial_pass(page_number as ushort)
     dim cur_arg as string
 	dim t_sym as symtab_entry
 	dim i as integer
-   
+	dim origin as integer
+	dim program_size as integer
+	origin = 0
 
     cpu_state.ep = page_number
 
@@ -140,7 +146,8 @@ sub initial_pass(page_number as ushort)
                 else
                     asm_offset = get_lexer_entry(1).intval
                 end if          
-                print ">>> PASS 1 [INFO]:   Program ORIGIN set to offset "; hex(asm_offset)
+                'print ">>> PASS 1 [INFO]:   Program ORIGIN set to offset "; hex(asm_offset)
+				origin = asm_offset
             case "EQU"
                 t_sym.e_key = get_lexer_entry(1).strval
                 t_sym.e_class = SYMCLASS_EQU
@@ -198,7 +205,7 @@ sub initial_pass(page_number as ushort)
                 fixup_flag = 0
 	            ts = expand_macros(input_lines(i))
 	
-	            print ">>> PASS 1 [OUTPUT]: "; ilxi_pad_left(hex(asm_offset), "0", 4); ":  "; ts
+	            'print ">>> PASS 1 [OUTPUT]: "; ilxi_pad_left(hex(asm_offset), "0", 4); ":  "; ts
 	
 	            asm_assemble ts
                 asm_offset += 1
@@ -206,6 +213,9 @@ sub initial_pass(page_number as ushort)
                 if fixup_flag = 1 then udtab(udidx).byte_offset = asm_offset - 2
 	    end select
 	next i
+	
+	program_size = asm_offset - origin
+	print "ASSEMBLED "; trim(str(program_size)); " BYTES"
 	
 end sub ' initial_pass()
 
@@ -272,14 +282,14 @@ function expand_macros(input_string as string) as string
                 select case symbol.e_class
                     case SYMCLASS_EQU
                         if symbol.resolved = 0 then
-                            print ">>> PASS 1 [FATAL]: Unresolved EQU symbol "; macro_name
+                            print "FATAL UNRESOLVED EQU "; macro_name
                             end       
                         end if 
 
                         b &= trim(symbol.strval)
                     case SYMCLASS_VAR
                         if symbol.resolved = 0 then
-                            print ">>> PASS 1 [FATAL]: Unresolved VAR symbol "; macro_name
+                            print "FATAL UNRESOLVED VAR "; macro_name
                             end
                         end if
 
@@ -291,7 +301,7 @@ function expand_macros(input_string as string) as string
                         ' resolution until next pass if not resolved
                         '
                         if symbol.resolved = 0 then
-                            print ">>> PASS 1 [INFO]:   Deferring resolution of '"; macro_name; "' until next pass"
+                            'print ">>> PASS 1 [INFO]:   Deferring resolution of '"; macro_name; "' until next pass"
                             
                             dim uent as undef_entry
                         

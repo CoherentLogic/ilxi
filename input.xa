@@ -1,0 +1,63 @@
+;
+; input.xa
+;
+
+    PROGRAM TITLE 'INPUT'
+    ORIGIN 0
+    
+    EQU VID_PAGE 1
+    EQU VID_BASE 0
+
+    EQU DSEG 0
+    EQU SSEG 10
+	
+    BRANCH WORD {__START}
+
+    VAR ZSTRING PROMPT "ENTER A NUMBER: "	
+
+LABEL __START
+    
+    COPY WORD %DP,{DSEG}
+    COPY WORD %SP,{SSEG}
+    COPY WORD %SS,%DP
+    COPY WORD %SI,{PROMPT}
+    SCALL WORD {__PROMPT}
+
+    OUT WORD 0,1
+    OUT WORD 1,1
+    OUT WORD 2,0
+    OUT WORD 3,0
+
+    COPY BYTE %LC,0
+
+LABEL __LOOP
+    
+    IN WORD %GA,4
+    HLT
+
+
+LABEL __PROMPT
+    ;;
+    ;; PRESERVE REGISTERS
+    ;; 
+    PUSH WORD %BP
+    COPY WORD %BP,%SO
+
+    PUSH WORD %SS
+    PUSH WORD %DS
+    PUSH WORD %DI
+    
+    COPY WORD %DS,{VID_PAGE}   
+
+    CPSZ
+    
+    ;;
+    ;; RESTORE REGISTERS AND RETURN
+    ;;
+    POP WORD %DI
+    POP WORD %DS
+    POP WORD %SS
+    
+    POP WORD %BP
+
+    SRET

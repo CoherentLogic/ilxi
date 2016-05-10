@@ -373,6 +373,7 @@ sub cpu_dump_state()
     print ""
     print ""
     print "Page Size:", PAGESIZE,"Page Count:",PAGECOUNT
+    print "Total Memory:",(PAGESIZE*PAGECOUNT)/1024;" Kb"
     print ""
     print "PC "; ilxi_pad_left(hex(x.pc),"0",4), "EC "; ilxi_pad_left(hex(x.ec),"0",4), "ES "; ilxi_pad_left(hex(x.es),"0",4), "CP "; ilxi_pad_left(hex(x.cp),"0",4), "DP "; ilxi_pad_left(hex(x.dp),"0",4)
     print "EP "; ilxi_pad_left(hex(x.ep),"0",4), "SP "; ilxi_pad_left(hex(x.sp),"0",4), "SO "; ilxi_pad_left(hex(x.so),"0",4), "FL "; ilxi_pad_left(hex(x.fl),"0",4), "SS "; ilxi_pad_left(hex(x.ss),"0",4)
