@@ -81,7 +81,9 @@ A CPU instruction will be fetched from the memory location referred to
 by the CP:PC register pair, decoded, and executed. PC will then be 
 incremented.
 
-Instructions (ICALL, SCALL, and LCALL) are 
+Instructions (ICALL, SCALL, and LCALL) are provided for calling subroutines.
+The RET family of instructions (IRET, SRET, and LRET) are provided to clean
+up the stack and return.
 
 
 ##ILXI Interactive Commands
