@@ -13,8 +13,8 @@ The ILXI memory model consists of non-overlapping, 64Kb pages. Up to
 
 The maximum amount of memory accessible in ILXI is 4096MB.
 
-Addresses are in the form of page:offset, where page is typically 
-one of the page registers CP, DP, EP, or SP, and offset is the number of
+Addresses are in the form of *page*:*offset*, where *page* is typically 
+one of the page registers CP, DP, EP, or SP, and *offset* is the number of
 bytes from the beginning of the page by which the address is offset.
 
 ###Data Types
@@ -206,7 +206,7 @@ up the stack and return.
 ###loadpage, lp
 loadpage - Load a memory page from host file
 
-Syntax:  [loadpage|lp] \<host-file\> \<page-number\>
+Syntax:  [loadpage|lp] *host-file* *page-number*
 
 Details:
 
@@ -217,7 +217,7 @@ the xiasm assembler, or generated from other ILXI compilers.
 ###savepage, sp
 savepage - Save a memory page to host file
 
-Syntax:  [savepage|sp] \<host-file\> \<page-index\>
+Syntax:  [savepage|sp] *host-file* *page-index*
 
 Details:
 
@@ -229,31 +229,31 @@ environment.
 ###writesect, ws
 writesect - Write to one sector of an attached disk
 
-Syntax: [writesect|ws] \<page-number\> \<offset\> \<channel\> \<track\> \<sector\>
+Syntax: [writesect|ws] *page-number* *offset* *channel* *track* *sector*
 
 Details:
 
-writesect writes data from \<page-number\>:\<offset\> to the specified disk sector.
+writesect writes data from *page-number*:*offset* to the specified disk sector.
 
 ###assemble
 assemble - interactively assemble instructions directly into memory
 
-Syntax: assemble \<origin\>
+Syntax: assemble *origin*
 
 Details:
 
 assemble allows you to interactively assemble instructions into ILXI memory.
-The starting address is EP:\<origin\>, where EP is the CPU's EP register.
+The starting address is EP:*origin*, where EP is the CPU's EP register.
 
 ###disassemble, di
 disassemble - disassemble instructions in memory
 
-Syntax: [disassemble|di] \<starting-offset\> \<instruction-count\>
+Syntax: [disassemble|di] *starting-offset* *instruction-count*
 
 Details:
 
-disassemble will convert \<instruction-count\> instructions of machine code 
-starting at CP:\<starting-offset\>
+disassemble will convert *instruction-count* instructions of machine code 
+starting at CP:*starting-offset*
 
 ###step
 step - single-step through program instructions
@@ -267,60 +267,60 @@ step will advance the program counter register and execute the next instruction.
 ###getr
 getr - get the value of a CPU register
 
-Syntax: getr \<register-name\>
+Syntax: getr *register-name*
 
 Details:
 
-getr will return the value contained in the CPU register denoted by \<register-name\>
+getr will return the value contained in the CPU register denoted by *register-name*
 
 ###setr
 setr - set the value of a CPU register
 
-Syntax: setr \<register-name\> \<value\>
+Syntax: setr *register-name* *value*
 
 Details:
 
-setr will set the CPU register denoted by \<register-name\> to \<value\>
+setr will set the CPU register denoted by *register-name* to *value*
 
 ###pushb
 pushb - push a BYTE value onto the stack
 
-Syntax: pushb \<byte-value\>
+Syntax: pushb *byte-value*
 
 Details:
 
-pushb will push \<byte-value\> onto the stack, and update CPU registers
+pushb will push *byte-value* onto the stack, and update CPU registers
 accordingly.
 
 ###pushw
 pushw - push a WORD value onto the stack
 
-Syntax: pushw \<word-value\>
+Syntax: pushw *word-value*
 
 Details:
 
-pushw will push \<word-value\> onto the stack, and update CPU registers
+pushw will push *word-value* onto the stack, and update CPU registers
 accordingly.
 
 ###getm
 getm - dump memory contents to screen
 
-Syntax: getm \<start-offset\> \<end-offset\>
+Syntax: getm *start-offset* *end-offset*
 
 Details:
 
-getm will display the contents of memory from DP:\<start-offset\> to
-DP:\<end-offset\> on the screen.
+getm will display the contents of memory from DP:*start-offset* to
+DP:*end-offset* on the screen.
 
 ###setm
 setm - set the value of bytes or words in memory
 
-Syntax: setm \<offset\> \<value\>
+Syntax: setm *offset* *value*
 
 Details:
 
-setm will write \<value\> to memory address DP:\<offset\>.
-The \<value\> can be either a BYTE or a WORD.
+setm will write *value* to memory address DP:*offset*.
+The *value* can be either a BYTE or a WORD.
 
 ###dumpcpu, d
 dumpcpu - displays the state of CPU registers
@@ -335,11 +335,11 @@ all CPU registers and flags.
 ###trace
 trace - toggle program trace
 
-Syntax: trace \<value\>
+Syntax: trace *value*
 
 Details:
 
-trace will turn program trace on and off. \<value\> can be
+trace will turn program trace on and off. *value* can be
 either 1 or 0, where 1 turns tracing on and 0 turns tracing off.
 
 In program trace mode, the CPU will halt after each instruction,
@@ -380,11 +380,11 @@ on a program after a program-generated HALT is encountered.
 ###help
 help - display online help
 
-Syntax:  help \<topic\>
+Syntax:  help *topic*
 
 Details:
 
-Displays online help topic \<topic\> on the screen.
+Displays online help topic *topic* on the screen.
 
 ###?
 ? - display list of help topics

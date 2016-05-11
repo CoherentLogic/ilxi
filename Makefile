@@ -1,7 +1,9 @@
 #
 #  ILXI Virtual Machine
 #
-#  Makefile (libilxi)
+#  ILXI Virtual Machine
+#
+#  Makefile (master build file)
 #  
 #  Copyright 2016 John P. Willis <jpw@coherent-logic.com>
 #  
@@ -45,11 +47,9 @@ xiasm: lib
 util: lib
 	cd src/util; make
 
-
 clean:
 	cd src/lib; make clean
 	cd src/vm; make clean
 	cd src/util; make clean
 	cd src/xiasm; make clean
 	rm -rf dist
-	rm README
