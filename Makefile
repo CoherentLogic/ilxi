@@ -1,11 +1,21 @@
+LIBILXI_OBJS = asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o disk.o help.o
 VM_OBJS = ilxi.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o disk.o help.o
-XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
+#XIASM_OBJS = xiasm.o asm.o cpu.o lexer.o storage.o inst.o error.o util.o console.o bus.o signal.o message.o profile.o config.o
+XIASM_OBJS = xiasm.o 
 MKDISK_OBJS = mkdisk.o disk.o asm.o cpu.o error.o host.o storage.o lexer.o inst.o util.o bus.o console.o signal.o message.o profile.o config.o
  
 FBCFLAGS = -g -mt #-d STACKDEBUG -d INSTDEBUG #-d LEXDEBUG
 
 
-all: vm assembler diskutil rom test 
+all: vm assembler diskutil rom test libilxi
+
+libilxi: libilxi.a
+
+libilxi.so: $(LIBILXI_OBJS) 
+	fbc $(FBCFLAGS) -dylib -x libilxi.so $(LIBILXI_OBJS)
+
+libilxi.a: $(LIBILXI_OBJS)
+	fbc $(FBCFLAGS) -lib -x libilxi.a $(LIBILXI_OBJS)
 
 diskutil: mkdisk
 
@@ -29,8 +39,8 @@ assembler: xiasm
 mkdisk: $(MKDISK_OBJS)
 	fbc $(FBCFLAGS) -x mkdisk $(MKDISK_OBJS)
 
-xiasm: $(XIASM_OBJS)
-	fbc $(FBCFLAGS) -x xiasm $(XIASM_OBJS)
+xiasm: $(XIASM_OBJS) libilxi
+	fbc $(FBCFLAGS) -l ilxi -x xiasm $(XIASM_OBJS)
 
 xiasm.o: xiasm.bas
 	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
@@ -93,4 +103,4 @@ message.o: message.bas
 	fbc $(FBCFLAGS) -o message.o -c message.bas
 
 clean:
-	rm -f *.o ilxi xiasm rom.bin t_stack.bin mkdisk diskboot.bin
+	rm -f *.o ilxi xiasm *.bin mkdisk *.a

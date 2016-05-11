@@ -20,6 +20,8 @@ sub main(args as string)
     dim argi as integer = 0
 
     arg_count = lex(args)
+    
+    redim input_lines(1) as string
 
 	print "ILXI EXTERNAL ASSEMBLER V0.02    (C) COHERENT LOGIC DEVELOPMENT 2016"
 	print ""
@@ -252,6 +254,7 @@ function lookup_undef(key as string) as undef_entry
 
     for i = 1 to udidx
     next
+
 
 end function
 
