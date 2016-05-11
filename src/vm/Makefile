@@ -1,7 +1,7 @@
 #
 #  ILXI Virtual Machine
 #
-#  Makefile (libilxi)
+#  Makefile (ilxi)
 #  
 #  Copyright 2016 John P. Willis <jpw@coherent-logic.com>
 #  
@@ -21,35 +21,17 @@
 #  MA 02110-1301, USA.
 #  
 #
-BINFILES = xiasm mkdisk ilxi ilxi.xmf
 
-all: vm xiasm util
+OBJS = ilxi.o
+FBCFLAGS = -g -mt -i ../include -p ../lib
 
-dist: all
-	mkdir -p dist/
-	cp src/vm/ilxi dist/
-	cp src/util/mkdisk dist/
-	cp src/xiasm/xiasm dist/
-	cp doc/ilxi.xmf dist/
-	cp bin/.ilximrc dist/
-
-lib:
-	cd src/lib; make
+ilxi: $(OBJS)
+	fbc $(FBCFLAGS) -l ilxi -x ilxi $(OBJS)
 	
-vm: lib
-	cd src/vm; make
-	
-xiasm: lib
-	cd src/xiasm; make
-
-util: lib
-	cd src/util; make
-
+ilxi.o: ilxi.bas
+	fbc $(FBCFLAGS) -m ilxi -o ilxi.o -c ilxi.bas
 
 clean:
-	cd src/lib; make clean
-	cd src/vm; make clean
-	cd src/util; make clean
-	cd src/xiasm; make clean
-	rm -rf dist
-	rm README
+	rm -f ilxi $(OBJS)
+
+
