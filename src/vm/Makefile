@@ -23,7 +23,7 @@
 #
 
 OBJS = ilxi.o
-FBCFLAGS = -g -mt -i ../include -p ../lib
+FBCFLAGS = -g -mt -i ../include -p ../libilxi
 
 ilxi: $(OBJS)
 	fbc $(FBCFLAGS) -l ilxi -x ilxi $(OBJS)

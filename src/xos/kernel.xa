@@ -7,62 +7,68 @@
 ;   kernel.xa - kernel routines
 ;
     PROGRAM TITLE 'XOS'
+    SECTION TEXT
     ORIGIN 0
 
-    EQU PG_SYS 0                ; system code page
-    EQU PG_VID 1                ; video buffer page
-    EQU PG_DAT 0                ; system data page
-    EQU PG_DTA 2                ; disk transfer area
-    EQU PG_STK 10               ; stack page
+    EQU PG_SYS 0                    ; system code page
+    EQU PG_VID 1                    ; video buffer page
+    EQU PG_DAT 0                    ; system data page
+    EQU PG_DTA 2                    ; disk transfer area
+    EQU PG_STK 10                   ; stack page
     
-    BRANCH WORD {__BOOT}        ; skip decls, branch to __BOOT
-
-    VAR WORD CON_PTR 1          ; console pointer
+    BRANCH WORD {XOS_BOOT}          ; warm boot
+    BRANCH WORD {XOS_HALT}          ; halt system
+    
+    BRANCH WORD {XOS_CON_INIT}      ; initialize console
+    BRANCH WORD {XOS_CON_LOCATE}    ; set cursor position
+    BRANCH WORD {XOS_CON_PRINTC}    ; print character
+    BRANCH WORD {XOS_CON_PRINTL}    ; print line
+    BRANCH WORD {XOS_CON_SCROLL}    ; scroll console
+    
+    BRANCH WORD {XOS_DISK_INIT}     ; initialize disk subsystem
+    BRANCH WORD {XOS_DISK_SELECT}   ; select a disk
+    BRANCH WORD {XOS_DISK_COUNT}    ; get count of disks
+    BRANCH WORD {XOS_DISK_TRACKS}   ; get track count
+    BRANCH WORD {XOS_DISK_SECTORS}  ; get count of sectors per track
+    BRANCH WORD {XOS_DISK_SEEK}     ; seek to a track
+    BRANCH WORD {XOS_DISK_READ}     ; read a sector
+    BRANCH WORD {XOS_DISK_WRITE}    ; write a sector
+    BRANCH WORD {XOS_DISK_FORMAT}   ; format a disk
+    
+    BRANCH WORD {XOS_FILE_FIND}     ; find a file
+    BRANCH WORD {XOS_FILE_CREATE}   ; create a file
+    BRANCH WORD {XOS_FILE_ERASE}    ; erase a file
+    BRANCH WORD {XOS_FILE_OPEN}     ; open a file
+    BRANCH WORD {XOS_FILE_READ}     ; read from a file
+    BRANCH WORD {XOS_FILE_WRITE}    ; write to a file
+    BRANCH WORD {XOS_FILE_SEEK}     ; seek to a position in a file
+    BRANCH WORD {XOS_FILE_CLOSE}    ; close a file
+    
+    BRANCH WORD {XOS_MEM_SIZE}      ; get count of free bytes
+    BRANCH WORD {XOS_MEM_ALLOC}     ; allocate bytes of memory
+    BRANCH WORD {XOS_MEM_DEALLOC}   ; deallocate bytes of memory
+    
+    BRANCH WORD {XOS_IMG_LOAD}      ; load an image into memory
+    BRANCH WORD {XOS_IMG_START}     ; start a loaded image
+    
+    
+    VAR WORD CON_PTR 1              ; console pointer
     VAR ZSTRING BOOTMSG "ILXI XOS 0.1"
 
-;****
-; CONSOLE_INIT
-;  Initialize the XOS console
-;
-LABEL CONSOLE_INIT              
-    OUT 0,1                     ; enable cursor
-    OUT 1,25                    ; set console cycle to 25ms
-    OUT 2,0                     ; no horizontal offset
-    OUT 3,0                     ; no vertical offset
-    COPY WORD (#{CON_PTR}),1    ; initialize console pointer
-    SRET
 
-;****
-; CONSOLE_PRINT
-;  Print string pointed to by SS:SI 
-;
-LABEL CONSOLE_PRINT
-    PUSH WORD %BP               ; preserve BP
-    COPY WORD %BP,%SO           ; copy stack offset to base ptr
-
-    PUSH WORD %SS               ; preserve SS
-    PUSH WORD %DS               ; preserve DS
-    PUSH WORD %DI               ; preserve DI
+    INCLUDE console.xa
+    INCLUDE disk.xa
+    INCLUDE file.xa
+    INCLUDE mem.xa
+    INCLUDE img.xa
     
-    COPY WORD %DS,{PG_VID}      ; destination page = video page
-    COPY WORD %DI,#{CON_PTR}    ; destination offset = CON_PTR
 
-    CPSZ                        ; copy SS:SI to video buffer
-
-    ADD WORD (#{CON_PTR}),%DI   ; update console pointer
     
-    POP WORD %DI                ; restore DI
-    POP WORD %DS                ; restore DS
-    POP WORD %SS                ; restore SS
-    POP WORD %BP                ; restore BP
-
-    SRET
-    
-LABEL __BOOT
+LABEL XOS_BOOT
     COPY WORD %DP,{PG_DAT}      ; initialize data page
     COPY WORD %SP,{PG_STK}      ; initialize stack page
     
     COPY WORD %SS,%DP           ; point SS:SI to BOOTMSG
     COPY WORD %SI,{BOOTMSG}
-    SCALL WORD {CONSOLE_PRINT}  ; call print routine
+    SCALL WORD {XOS_CON_PRINT}  ; call print routine
 

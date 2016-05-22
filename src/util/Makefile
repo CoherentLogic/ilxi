@@ -24,7 +24,7 @@
 
 MKDISK_OBJS = mkdisk.o
 OBJS = $(MKDISK_OBJS)
-FBCFLAGS = -g -mt -i ../include -p ../lib
+FBCFLAGS = -g -mt -i ../include -p ../libilxi
 EXE = mkdisk
 
 all: $(EXE)

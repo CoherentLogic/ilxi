@@ -1,7 +1,7 @@
 #
 #  ILXI Virtual Machine
 #
-#  Makefile (xiasm)
+#  Makefile (link)
 #  
 #  Copyright 2016 John P. Willis <jpw@coherent-logic.com>
 #  
@@ -22,14 +22,14 @@
 #  
 #
 
-OBJS = xiasm.o
+OBJS = link.o
 FBCFLAGS = -g -mt -i ../include -p ../libilxi -p ../libobj
 
-xiasm: $(OBJS)
-	fbc $(FBCFLAGS) -l ilxi -x xiasm $(OBJS)
+link: $(OBJS)
+	fbc $(FBCFLAGS) -l ilxi -x link $(OBJS)
 	
-xiasm.o: xiasm.bas
-	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
+link.o: link.bas
+	fbc $(FBCFLAGS) -m link -o link.o -c link.bas
 
 clean:
-	rm -f xiasm $(OBJS)
+	rm -f link $(OBJS)

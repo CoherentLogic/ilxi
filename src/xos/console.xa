@@ -7,4 +7,40 @@
 ;   console.xa - console routines
 ;
 
- 
+;****
+; XOS_CON_INIT
+;  Initialize the XOS console
+;
+LABEL XOS_CON_INIT              
+    OUT 0,1                     ; enable cursor
+    OUT 1,25                    ; set console cycle to 25ms
+    OUT 2,0                     ; no horizontal offset
+    OUT 3,0                     ; no vertical offset
+    COPY WORD (#{CON_PTR}),1    ; initialize CON pointer
+    SRET
+
+;****
+; XOS_CON_PRINT
+;  Print string pointed to by SS:SI 
+;
+LABEL XOS_CON_PRINT
+    PUSH WORD %BP               ; preserve BP
+    COPY WORD %BP,%SO           ; copy stack offset to base ptr
+
+    PUSH WORD %SS               ; preserve SS
+    PUSH WORD %DS               ; preserve DS
+    PUSH WORD %DI               ; preserve DI
+    
+    COPY WORD %DS,{PG_VID}      ; destination page = video page
+    COPY WORD %DI,#{CON_PTR}    ; destination offset = CON_PTR
+
+    CPSZ                        ; copy SS:SI to video buffer
+
+    ADD WORD (#{CON_PTR}),%DI   ; update console pointer
+    
+    POP WORD %DI                ; restore DI
+    POP WORD %DS                ; restore DS
+    POP WORD %SS                ; restore SS
+    POP WORD %BP                ; restore BP
+
+    SRET

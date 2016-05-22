@@ -1,7 +1,7 @@
 #
 #  ILXI Virtual Machine
 #
-#  Makefile (xiasm)
+#  Makefile (libobj)
 #  
 #  Copyright 2016 John P. Willis <jpw@coherent-logic.com>
 #  
@@ -20,16 +20,19 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#
+#  
 
-OBJS = xiasm.o
-FBCFLAGS = -g -mt -i ../include -p ../libilxi -p ../libobj
+FBCFLAGS = -g -mt -i ../include -p ../libilxi
+OBJS = libobj.o
+EXE = libobj.a
 
-xiasm: $(OBJS)
-	fbc $(FBCFLAGS) -l ilxi -x xiasm $(OBJS)
+all: $(EXE)
 	
-xiasm.o: xiasm.bas
-	fbc $(FBCFLAGS) -m xiasm -o xiasm.o -c xiasm.bas
+$(EXE): $(OBJS)
+	fbc $(FBCFLAGS) -lib -x $(EXE) $(OBJS)
+
+libobj.o: libobj.bas
+	fbc $(FBCFLAGS) -o libobj.o -c libobj.bas
 
 clean:
-	rm -f xiasm $(OBJS)
+	rm -f libobj.a $(OBJS)

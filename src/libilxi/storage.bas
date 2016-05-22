@@ -16,6 +16,10 @@ function st_read_byte(page as integer, offset as integer) as byte
 	return mem(page).contents(offset)
 end function
 
+function st_read_page(page as integer) as st_page
+    return mem(page)
+end function
+
 sub st_write_byte(page as integer, offset as integer, value as byte)
 	if (page > (PAGECOUNT - 1)) or (page < 0) then
 	   machine_error ERR_INVALID_PAGE_ID, 10

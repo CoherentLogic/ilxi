@@ -23,6 +23,9 @@ type undef_entry
     byte_offset as ushort
 end type
 
+
+    
+
 dim shared symtab() as symtab_entry
 dim shared udtab() as undef_entry
 
@@ -40,6 +43,6 @@ declare function expand_macros(input_string as string) as string
 declare sub do_asm(filename as string, argi as integer)
 declare sub main(args as string)
 declare function read_source_file(filename as string) as integer
-declare sub initial_pass(page_number as ushort)
+declare function assemble_section(page_number as ushort, input_file as string) as section_header
 declare sub install_undef(uent as undef_entry)
 declare function lookup_undef(key as string) as undef_entry

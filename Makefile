@@ -25,31 +25,41 @@
 #
 BINFILES = xiasm mkdisk ilxi ilxi.xmf
 
-all: vm xiasm util
+all: vm xiasm util linker
 
 dist: all
 	mkdir -p dist/
+	cp src/linker/link dist/
 	cp src/vm/ilxi dist/
 	cp src/util/mkdisk dist/
 	cp src/xiasm/xiasm dist/
 	cp doc/ilxi.xmf dist/
 	cp bin/.ilximrc dist/
+	cp examples/input/input.xa dist/
 
-lib:
-	cd src/lib; make
-	
-vm: lib
+libilxi:
+	cd src/libilxi; make
+
+libobj: libilxi
+	cd src/libobj; make
+
+linker: libilxi libobj
+	cd src/linker; make
+
+vm: libilxi
 	cd src/vm; make
-	
-xiasm: lib
+
+xiasm: libilxi libobj
 	cd src/xiasm; make
 
-util: lib
+util: libilxi
 	cd src/util; make
 
 clean:
-	cd src/lib; make clean
+	cd src/libilxi; make clean
+	cd src/libobj; make clean
 	cd src/vm; make clean
 	cd src/util; make clean
 	cd src/xiasm; make clean
+	cd src/linker; make clean
 	rm -rf dist
