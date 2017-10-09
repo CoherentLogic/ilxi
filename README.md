@@ -1,10 +1,10 @@
-#ILXI Virtual Machine
+# ILXI Virtual Machine
 
 ILXI provides a virtual computer, somewhat reminiscent of the microcomputers of the 1970s.
 
-##Architecture Overview
+## Architecture Overview
 
-###Memory Model
+### Memory Model
 
 ILXI presents a 16-bit architecture with a 32-bit address bus.
 
@@ -17,13 +17,13 @@ Addresses are in the form of *page*:*offset*, where *page* is typically
 one of the page registers CP, DP, EP, or SP, and *offset* is the number of
 bytes from the beginning of the page by which the address is offset.
 
-###Data Types
+### Data Types
 
 The native data types of ILXI are an 8-bit BYTE and a 16-bit WORD. Signed
 and floating-point numbers are not natively supported at this time. WORD
 registers employ big-endian byte ordering, as does main memory.
 
-###Registers
+### Registers
 
 The CPU exposes sixteen general-purpose WORD registers, GA through GP. 
 The first five of these registers can also be accessed as ten BYTE 
@@ -45,7 +45,7 @@ The PC (Program Counter) register is used in conjunction with the CP
 Finally, there are three registers indicating CPU state. These are
 EC (Error Code), ES (Error Severity), and FL (Flags).
 
-###Flags
+### Flags
 
 The FL register is used to represent the present status of thirteen
 distinct flags. They are summarized as follows:
@@ -68,14 +68,14 @@ distinct flags. They are summarized as follows:
 | DF | 1 | DEBUG |
 
 
-###Stack
+### Stack
 
 An ILXI program may define a stack at any memory page the user wishes.
 This page is specified in the SP register, and the current stack position.
 The stack grows downward from the top of this page, with the current
 position specified in the SO (Stack Offset) register.
 
-###Code Execution
+### Code Execution
 
 A CPU instruction will be fetched from the memory location referred to
 by the CP:PC register pair, decoded, and executed. PC will then be 
@@ -85,100 +85,100 @@ Instructions (ICALL, SCALL, and LCALL) are provided for calling subroutines.
 The RET family of instructions (IRET, SRET, and LRET) are provided to clean
 up the stack and return.
 
-##Addressing Modes
+## Addressing Modes
 
-###Immediate
+### Immediate
 
-###Register-Direct
+### Register-Direct
 
-###Memory-Direct
+### Memory-Direct
 
-###Register-Direct + Displacement
+### Register-Direct + Displacement
 
-###Memory-Direct + Displacement
+### Memory-Direct + Displacement
 
-###Register-Indirect
+### Register-Indirect
 
-###Memory-Indirect
+### Memory-Indirect
 
-###Register-Indirect + Displacement
+### Register-Indirect + Displacement
 
-###Memory-Indirect + Displacement
+### Memory-Indirect + Displacement
 
-##Instruction Set
+## Instruction Set
 
-###COPY
+### COPY
 
-###CPSZ
+### CPSZ
 
-###ADD
+### ADD
 
-###SUB
+### SUB
 
-###MUL
+### MUL
 
-###DIV
+### DIV
 
-###SHL
+### SHL
 
-###SHR
+### SHR
 
-###OR
+### OR
 
-###NOT
+### NOT
 
-###AND
+### AND
 
-###XOR
+### XOR
 
-###EQV
+### EQV
 
-###CMP
+### CMP
 
-###CMPSZ
+### CMPSZ
+    
+### CNS
+    
+### CSN
+    
+### BRANCH
+    
+### BEQ
+    
+### BNE
+    
+### BZ
+    
+### BLT
+    
+### BGT
+    
+### SCALL
+    
+### LCALL
+    
+### ICALL
+    
+### SRET
+    
+### LRET
+    
+### IRET
+    
+### PUSH
+    
+### POP
+    
+### IN
+    
+### OUT
+    
+### NOP
+    
+### HLT
 
-###CNS
 
-###CSN
-
-###BRANCH
-
-###BEQ
-
-###BNE
-
-###BZ
-
-###BLT
-
-###BGT
-
-###SCALL
-
-###LCALL
-
-###ICALL
-
-###SRET
-
-###LRET
-
-###IRET
-
-###PUSH
-
-###POP
-
-###IN
-
-###OUT
-
-###NOP
-
-###HLT
-
-
-##ILXI Interactive Commands
+## ILXI Interactive Commands
 
 | Command | Description |
 | --- | --- |
@@ -203,7 +203,7 @@ up the stack and return.
 | ?	| Display a list of ILXI operations |
 | exit, quit | exit ILXI |
 
-###loadpage, lp
+### loadpage, lp
 loadpage - Load a memory page from host file
 
 Syntax:  [loadpage|lp] *host-file* *page-number*
@@ -214,7 +214,7 @@ loadpage loads a single 64Kb page from a memory image file
 on the host machine. This can be a program, assembled with
 the xiasm assembler, or generated from other ILXI compilers.
 
-###savepage, sp
+### savepage, sp
 savepage - Save a memory page to host file
 
 Syntax:  [savepage|sp] *host-file* *page-index*
@@ -226,7 +226,7 @@ memory image file on the host. When used with the assemble command,
 this allows the user to use ILXI as an interactive program development
 environment.
 
-###writesect, ws
+### writesect, ws
 writesect - Write to one sector of an attached disk
 
 Syntax: [writesect|ws] *page-number* *offset* *channel* *track* *sector*
@@ -235,7 +235,7 @@ Details:
 
 writesect writes data from *page-number*:*offset* to the specified disk sector.
 
-###assemble
+### assemble
 assemble - interactively assemble instructions directly into memory
 
 Syntax: assemble *origin*
@@ -245,7 +245,7 @@ Details:
 assemble allows you to interactively assemble instructions into ILXI memory.
 The starting address is EP:*origin*, where EP is the CPU's EP register.
 
-###disassemble, di
+### disassemble, di
 disassemble - disassemble instructions in memory
 
 Syntax: [disassemble|di] *starting-offset* *instruction-count*
@@ -255,7 +255,7 @@ Details:
 disassemble will convert *instruction-count* instructions of machine code 
 starting at CP:*starting-offset*
 
-###step
+### step
 step - single-step through program instructions
 
 Syntax: step
@@ -264,7 +264,7 @@ Details:
 
 step will advance the program counter register and execute the next instruction.
 
-###getr
+### getr
 getr - get the value of a CPU register
 
 Syntax: getr *register-name*
@@ -273,7 +273,7 @@ Details:
 
 getr will return the value contained in the CPU register denoted by *register-name*
 
-###setr
+### setr
 setr - set the value of a CPU register
 
 Syntax: setr *register-name* *value*
@@ -282,7 +282,7 @@ Details:
 
 setr will set the CPU register denoted by *register-name* to *value*
 
-###pushb
+### pushb
 pushb - push a BYTE value onto the stack
 
 Syntax: pushb *byte-value*
@@ -292,7 +292,7 @@ Details:
 pushb will push *byte-value* onto the stack, and update CPU registers
 accordingly.
 
-###pushw
+### pushw
 pushw - push a WORD value onto the stack
 
 Syntax: pushw *word-value*
@@ -302,7 +302,7 @@ Details:
 pushw will push *word-value* onto the stack, and update CPU registers
 accordingly.
 
-###getm
+### getm
 getm - dump memory contents to screen
 
 Syntax: getm *start-offset* *end-offset*
@@ -312,7 +312,7 @@ Details:
 getm will display the contents of memory from DP:*start-offset* to
 DP:*end-offset* on the screen.
 
-###setm
+### setm
 setm - set the value of bytes or words in memory
 
 Syntax: setm *offset* *value*
@@ -322,7 +322,7 @@ Details:
 setm will write *value* to memory address DP:*offset*.
 The *value* can be either a BYTE or a WORD.
 
-###dumpcpu, d
+### dumpcpu, d
 dumpcpu - displays the state of CPU registers
 
 Syntax: [dumpcpu|d]
@@ -332,7 +332,7 @@ Details:
 The dumpcpu command will display the current contents of
 all CPU registers and flags.
 
-###trace
+### trace
 trace - toggle program trace
 
 Syntax: trace *value*
@@ -354,7 +354,7 @@ Details:
 
 Displays the current version of ILXI.
 
-###run
+### run
 run - run the CPU
 
 Syntax:  run
@@ -363,7 +363,7 @@ Details:
 
 The "run" command will start the CPU running at address CP:PC
 
-###reset
+### reset
 reset - re-initialize the CPU
 
 Syntax:  reset
@@ -377,7 +377,7 @@ the bus initialized, and signals initialized.
 This command must be used in order to perform single-step operations
 on a program after a program-generated HALT is encountered.
 
-###help
+### help
 help - display online help
 
 Syntax:  help *topic*
@@ -386,7 +386,7 @@ Details:
 
 Displays online help topic *topic* on the screen.
 
-###?
+### ?
 ? - display list of help topics
 
 Syntax:  ?
@@ -395,7 +395,7 @@ Details:
 
 Displays a list of available help topics
 
-###exit, quit
+### exit, quit
 exit - exit the ILXI environment
 
 Syntax:  exit
@@ -404,7 +404,7 @@ Details:
 
 Exits the ILXI environment.
 
-###clear, cls
+### clear, cls
 clear - clear the screen
 
 Syntax:  [clear|cls]
